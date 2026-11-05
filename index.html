@@ -352,6 +352,7 @@ function loadStock(i, keepMoney){
   S.stock=st;
   S.price=+(rnd(8,60)).toFixed(2);
   S.bars=[];S.big=null;S.minor=[];S.lastPct=0;S.bankrupt=null;S.upP=0.5;S.drift=0;
+  if(S.mine.pos) S.mine.cash += S.mine.pos.margin;   // 换股/退市时按成本退保证金
   S.mine.pos=null;
   if(!keepMoney) S.mine.cash=10000;
   $('stName').textContent=st.name;
@@ -475,6 +476,7 @@ function bankruptTick(){
   checkLiquidation();
   if(!S.bankrupt){ paint();draw();renderEvents();renderProb(); return; }
   if(S.bankrupt.left<=0){
+    settlePosition();        // 退市换股前按最后价结算持仓
     S.bankrupt=null;S.big=null;
     $('stDelist').style.display='none';
     document.querySelector('.eventbox').classList.remove('bankrupt');
@@ -516,6 +518,14 @@ function closePos(){
   S.mine.cash+=p.margin+pnl;
   S.mine.pos=null;
   paint();draw();
+}
+/* 换股/退市：按当前价结算持仓。赚的照给，亏的最多亏光保证金（不倒欠） */
+function settlePosition(){
+  const p=S.mine.pos;
+  if(!p) return;
+  const pnl=(S.price-p.open)*p.dir*p.hands*LOT;
+  S.mine.cash += Math.max(0, p.margin+pnl);
+  S.mine.pos=null;
 }
 function checkLiquidation(){
   const p=S.mine.pos;
@@ -764,6 +774,7 @@ $('btnStock').onclick=()=>{
   askNum('换哪只？1-'+STOCKS.length+'（资金保留、仓位清空）  '+names, String(next), v=>{
     const n=parseInt(v);
     if(!isFinite(n)||n<1||n>STOCKS.length) return;
+    settlePosition();          // 手动换股前按当前价结算持仓
     loadStock(n-1,true);
   });
 };
