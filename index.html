@@ -12,16 +12,14 @@ body.small-screen{display:block;overflow-x:hidden;overflow-y:auto;align-items:fl
 body.small-screen #stage{transform-origin:top left}
 html.small-screen,html.small-screen body{height:auto;overflow-x:hidden;overflow-y:auto;display:block}
 html.small-screen #stage{transform-origin:top left}
-#rotateHint{display:none;position:fixed;inset:0;z-index:9999;background:#050505;color:#c9a227;
-  flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:0 30px}
-#rotateHint .rh{font-size:30px;font-weight:700;letter-spacing:4px}
-#rotateHint .hs{font-size:17px;color:#8b7439;line-height:1.6}
-#rotateHint .rhgo{margin-top:10px;padding:14px 40px;border:1px solid #c9a227;border-radius:8px;
-  font-size:19px;color:#ffd75e;background:rgba(201,162,39,.12);cursor:pointer;user-select:none}
-#rotateHint .rhgo:active{background:rgba(201,162,39,.3)}
-#rotateHint .ico{font-size:64px;animation:rot 1.8s ease-in-out infinite}
-@keyframes rot{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
-@media (orientation:portrait) and (max-width:1000px){#rotateHint{display:flex}}
+#rotateHint{display:none;position:fixed;left:0;right:0;bottom:0;z-index:9999;background:rgba(12,9,4,.94);
+  border-top:1px solid #8a6d28;color:#d8c07a;padding:10px 14px;font-size:14px;text-align:center;
+  align-items:center;justify-content:center;gap:14px}
+#rotateHint .rh{font-size:15px;font-weight:700;color:#ffd75e;letter-spacing:2px}
+#rotateHint .hs{font-size:13px;color:#a9925a;line-height:1.4}
+#rotateHint .ico{display:none}
+#rotateHint .rhgo{padding:8px 18px;font-size:14px;margin:0}
+html.rot #stage{position:absolute;left:0;top:0;transform-origin:0 0}
 #bg{position:fixed;inset:0;z-index:0;display:flex}
 #bg .pane{flex:1 1 0;background-size:cover;background-position:center;background-repeat:no-repeat;filter:brightness(.55) saturate(.9)}
 #bg .pane:nth-child(1){background-image:url('bg.png')}
@@ -387,10 +385,9 @@ body.diff-real .minorbox .good,body.diff-real .minorbox .bad{color:#dfe6ee!impor
 </div>
 
 <div id="rotateHint">
-  <div class="ico">📱</div>
-  <div class="rh">请 横 屏</div>
-  <div class="hs">把手机横过来，按钮才看得见。<br>横屏后整页会自动缩放到屏幕宽度。</div>
-  <div class="rhgo" id="rhGo">已经横过来了，继续</div>
+  <div class="rh">竖屏也能玩</div>
+  <div class="hs">页面已自动转成横向显示；把手机横过来会更大更顺手。</div>
+  <div class="rhgo" id="rhGo">知道了</div>
 </div>
 
 <script>
@@ -399,21 +396,32 @@ const rnd=(a,b)=>a+Math.random()*(b-a);
 const rndi=(a,b)=>Math.floor(rnd(a,b+1));
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const stage=$('stage');
+/* 手机会社 WebView（微信/QQ）常常锁竖屏、也不触发 orientationchange，
+   所以不要求用户"真的横过来"：竖屏时直接把 1920×1080 舞台顺时针转 90° 铺满。 */
 function fit(){
   const w=innerWidth,h=innerHeight;
   const small=w<1100;
+  const portrait=h>w;
   if(small){
     document.documentElement.classList.add('small-screen');
-    stage.style.transform='none';
-    stage.style.zoom=String(Math.round(w/1920*1000)/1000);
+    stage.style.zoom='';
+    if(portrait){
+      document.documentElement.classList.add('rot');
+      const s=Math.min(h/1920, w/1080);
+      stage.style.transform='translate('+(w/2+540*s)+'px,'+(h/2-960*s)+'px) rotate(90deg) scale('+s+')';
+    }else{
+      document.documentElement.classList.remove('rot');
+      stage.style.transform='none';
+      stage.style.zoom=String(Math.round(w/1920*1000)/1000);
+    }
   }else{
-    document.documentElement.classList.remove('small-screen');
+    document.documentElement.classList.remove('small-screen','rot');
     stage.style.zoom='';
     stage.style.transform='scale('+Math.min(w/1920,h/1080)+')';
   }
   checkOrientation();
 }
-/* 竖屏提示用 JS 判断，比媒体查询可靠（部分手机横屏后 orientation 仍报 portrait） */
+/* 底部细提示条：竖屏时出现，不遮画面；横过来或点关闭后消失 */
 let rhDismissed=false;
 function checkOrientation(){
   const el=$('rotateHint');
@@ -421,8 +429,7 @@ function checkOrientation(){
   if(rhDismissed){ el.style.display='none'; return; }
   const w=Math.max(innerWidth, document.documentElement.clientWidth||0);
   const h=Math.min(innerHeight, document.documentElement.clientHeight||0);
-  const landscape = w > h*1.15;   // 明显横过来才算横屏
-  el.style.display=(!landscape && w<1000)?'flex':'none';
+  el.style.display=(h>w && w<=1100)?'flex':'none';
 }
 function onViewportChange(){ fit(); resizeCanvas(); draw(); }
 addEventListener('resize',onViewportChange);
