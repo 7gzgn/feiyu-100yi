@@ -16,6 +16,9 @@ html.small-screen #stage{transform-origin:top left}
   flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:0 30px}
 #rotateHint .rh{font-size:30px;font-weight:700;letter-spacing:4px}
 #rotateHint .hs{font-size:17px;color:#8b7439;line-height:1.6}
+#rotateHint .rhgo{margin-top:10px;padding:14px 40px;border:1px solid #c9a227;border-radius:8px;
+  font-size:19px;color:#ffd75e;background:rgba(201,162,39,.12);cursor:pointer;user-select:none}
+#rotateHint .rhgo:active{background:rgba(201,162,39,.3)}
 #rotateHint .ico{font-size:64px;animation:rot 1.8s ease-in-out infinite}
 @keyframes rot{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
 @media (orientation:portrait) and (max-width:1000px){#rotateHint{display:flex}}
@@ -387,6 +390,7 @@ body.diff-real .minorbox .good,body.diff-real .minorbox .bad{color:#dfe6ee!impor
   <div class="ico">📱</div>
   <div class="rh">请 横 屏</div>
   <div class="hs">把手机横过来，按钮才看得见。<br>横屏后整页会自动缩放到屏幕宽度。</div>
+  <div class="rhgo" id="rhGo">已经横过来了，继续</div>
 </div>
 
 <script>
@@ -410,12 +414,20 @@ function fit(){
   checkOrientation();
 }
 /* 竖屏提示用 JS 判断，比媒体查询可靠（部分手机横屏后 orientation 仍报 portrait） */
+let rhDismissed=false;
 function checkOrientation(){
   const el=$('rotateHint');
   if(!el) return;
-  const portrait=innerHeight>innerWidth;
-  el.style.display=(portrait && innerWidth<1000)?'flex':'none';
+  if(rhDismissed){ el.style.display='none'; return; }
+  const w=Math.max(innerWidth, document.documentElement.clientWidth||0);
+  const h=Math.min(innerHeight, document.documentElement.clientHeight||0);
+  const landscape = w > h*1.15;   // 明显横过来才算横屏
+  el.style.display=(!landscape && w<1000)?'flex':'none';
 }
+function onViewportChange(){ fit(); resizeCanvas(); draw(); }
+addEventListener('resize',onViewportChange);
+addEventListener('orientationchange',()=>setTimeout(onViewportChange,300));
+try{ if(window.visualViewport) visualViewport.addEventListener('resize',onViewportChange); }catch(e){}
 addEventListener('resize',()=>{fit();resizeCanvas();draw();});fit();
 
 const RED='#ff4a41',GREEN='#22d16a',YEL='#ffd75e';
@@ -1567,6 +1579,12 @@ document.querySelectorAll('.dwrap').forEach(el=>{
 
 /* 首次点击解锁音频 */
 document.addEventListener('click',()=>{ A(); },{once:true});
+/* 横屏提示兜底：检测失灵时手动关掉 */
+$('rhGo').onclick=()=>{
+  rhDismissed=true;
+  $('rotateHint').style.display='none';
+  onViewportChange();
+};
 
 /* ============ 启动 ============ */
 resizeCanvas();
