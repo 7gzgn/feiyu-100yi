@@ -2,11 +2,23 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>肥鱼挑战100亿</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>大肥鱼炒股模拟器</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;background:#050505;overflow:hidden}
 body{display:flex;align-items:center;justify-content:center;font-family:"Microsoft YaHei","PingFang SC",sans-serif;color:#e8e8e8}
+body.small-screen{display:block;overflow-x:hidden;overflow-y:auto;align-items:flex-start;background:#050505}
+body.small-screen #stage{transform-origin:top left}
+html.small-screen,html.small-screen body{height:auto;overflow-x:hidden;overflow-y:auto;display:block}
+html.small-screen #stage{transform-origin:top left}
+#rotateHint{display:none;position:fixed;inset:0;z-index:9999;background:#050505;color:#c9a227;
+  flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:0 30px}
+#rotateHint .rh{font-size:30px;font-weight:700;letter-spacing:4px}
+#rotateHint .hs{font-size:17px;color:#8b7439;line-height:1.6}
+#rotateHint .ico{font-size:64px;animation:rot 1.8s ease-in-out infinite}
+@keyframes rot{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
+@media (orientation:portrait) and (max-width:1000px){#rotateHint{display:flex}}
 #bg{position:fixed;inset:0;z-index:0;display:flex}
 #bg .pane{flex:1 1 0;background-size:cover;background-position:center;background-repeat:no-repeat;filter:brightness(.55) saturate(.9)}
 #bg .pane:nth-child(1){background-image:url('bg.png')}
@@ -20,10 +32,24 @@ body{display:flex;align-items:center;justify-content:center;font-family:"Microso
   box-shadow:0 18px 56px rgba(0,0,0,.75), inset 0 0 60px rgba(0,0,0,.35)}
 .box-title{font-size:15px;color:#8b7439;letter-spacing:4px}
 
+/* 难度条 */
+.diffbar{position:absolute;left:32px;top:22px;width:1260px;height:92px;display:flex;align-items:stretch;gap:10px;padding:8px 12px;
+  background:linear-gradient(180deg,rgba(10,17,26,.55),rgba(6,11,18,.55));border:1px solid #8a6d28;
+  backdrop-filter:blur(5px) saturate(1.15) brightness(.85)}
+.dwrap{flex:1 1 0;display:flex;flex-direction:column;gap:5px;justify-content:center;cursor:pointer;min-width:0}
+.dbtn{height:38px;border:1px solid #6b531f;color:#c9b06a;font-size:17px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;user-select:none;background:rgba(0,0,0,.15)}
+.dbtn.on{background:#c9a227;color:#1a1305;border-color:#e9d085}
+.dbtn.dim{opacity:.38}
+.dbtn:active{filter:brightness(1.15)}
+.ddesc{font-size:11px;line-height:1.25;color:#7a682f;text-align:center;letter-spacing:.1px}
+
 .namebox{position:absolute;left:32px;top:120px;width:1260px;height:96px;display:flex;align-items:center;padding:0 26px;gap:18px;
   background:linear-gradient(180deg,rgba(10,17,26,.52),rgba(6,11,18,.52));border:1px solid #8a6d28;border-bottom:none;
   backdrop-filter:blur(5px) saturate(1.15) brightness(.85)}
 .nb-name{font-size:40px;font-weight:700;color:#f0e2b8;letter-spacing:2px}
+.nb-namewrap{display:flex;flex-direction:column;gap:3px;max-width:520px;min-width:0}
+.nb-desc{font-size:13px;color:#8b7439;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.3px}
 .nb-board{font-size:19px;color:#d8c07a;border:1px solid #6b531f;border-radius:4px;padding:3px 11px}
 .nb-delist{font-size:19px;color:#fff;background:#c0392b;border-radius:4px;padding:3px 11px;display:none}
 .nb-spacer{flex:1}
@@ -107,31 +133,44 @@ body{display:flex;align-items:center;justify-content:center;font-family:"Microso
 .eventbox.bankrupt{border-color:#e02020;animation:bk 1s infinite alternate}
 @keyframes bk{from{box-shadow:0 18px 56px rgba(0,0,0,.8), inset 0 0 60px rgba(0,0,0,.55), 0 0 18px rgba(224,32,32,.4)}
 to{box-shadow:0 18px 56px rgba(0,0,0,.8), inset 0 0 80px rgba(224,32,32,.18), 0 0 64px rgba(224,32,32,.9)}}
-.eb-main{flex:1;display:flex;flex-direction:column;justify-content:center;gap:6px;border:1px solid #3d2f12;padding:10px 14px;background:rgba(255,255,255,.015)}
-.ev-text{font-size:30px;font-weight:700;letter-spacing:1px;line-height:1.15}
-.ev-sub{font-size:20px;opacity:.9;font-family:Consolas,monospace}
+.eb-main{flex:1;display:flex;flex-direction:column;gap:6px;min-height:0}
+#evList{flex:1;display:flex;flex-direction:column;gap:6px;overflow:auto;min-height:0;scrollbar-width:thin;scrollbar-color:rgba(201,162,39,.45) rgba(255,255,255,.04)}
+#evList::-webkit-scrollbar,.mb-slots::-webkit-scrollbar{width:8px}
+#evList::-webkit-scrollbar-track,.mb-slots::-webkit-scrollbar-track{background:rgba(255,255,255,.04)}
+#evList::-webkit-scrollbar-thumb,.mb-slots::-webkit-scrollbar-thumb{background:rgba(201,162,39,.45);border-radius:4px}
+#evList::-webkit-scrollbar-thumb:hover,.mb-slots::-webkit-scrollbar-thumb:hover{background:rgba(201,162,39,.75)}
+.mb-slots{flex:1;display:flex;flex-direction:column;gap:7px;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:rgba(201,162,39,.45) rgba(255,255,255,.04)}
+.ev-item,.mb-slot{cursor:pointer}
+.ev-item{flex:0 0 auto;border:1px solid #3d2f12;padding:7px 12px;background:rgba(255,255,255,.015);
+  display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ev-item .n{font-size:24px;font-weight:700;letter-spacing:1px;white-space:nowrap}
+.ev-item .d{font-size:15px;font-family:Consolas,monospace;color:#a28e52;white-space:nowrap}
+.ev-item.spec{border-color:#b3352b;box-shadow:0 0 14px rgba(224,32,32,.35), inset 0 0 24px rgba(224,32,32,.12)}
+.ev-item.spec .n{font-size:27px}
+.ev-empty{flex:1;display:flex;align-items:center;justify-content:center;color:#5c4f28;font-size:18px}
 
 .minorbox{flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:9px;min-height:0}
-.mb-slots{flex:1;display:flex;flex-direction:column;gap:7px;min-height:0}
-.mb-slot{flex:1;border:1px solid #3d2f12;background:rgba(255,255,255,.015);padding:5px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px;min-height:0}
+.mb-slots{flex:1;display:flex;flex-direction:column;gap:7px;min-height:0;overflow:auto}
+.mb-slot{flex:0 0 auto;border:1px solid #3d2f12;background:rgba(255,255,255,.015);padding:5px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px}
 .mb-slot .nm{font-size:19px;font-weight:700}
 .mb-slot .fx{font-size:16px;color:#a28e52;font-family:Consolas,monospace}
 .mb-idle{flex:1;display:flex;align-items:center;justify-content:center;color:#5c4f28;font-size:18px}
 
-.ctrlbox{height:190px;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.ctrlbox{height:232px;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
 .ctrl-row{display:flex;gap:10px}
-.cbtn{flex:1;height:52px;border:1px solid #6b531f;color:#d9c47f;font-size:18px;font-weight:700;
+.cbtn{flex:1;height:50px;border:1px solid #6b531f;color:#d9c47f;font-size:18px;font-weight:700;
   display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;user-select:none;white-space:nowrap;background:rgba(0,0,0,.15)}
 .cbtn:active{background:#c9a227;color:#1a1305}
 .cbtn.warn{color:#ff8a5c;border-color:#8a4028}
 .cbtn.warn:active{background:#b3352b;color:#fff}
 .cbtn.gold{color:#ffd75e;border-color:#8a6d28}
 .cbtn.gold:active{background:#c9a227;color:#1a1305}
+.cbtn.dim{opacity:.35}
 
-/* 自绘输入框（浏览器 prompt 有时被拦） */
+/* 自绘输入框 */
 .modal2{position:absolute;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6)}
 .modal2.show{display:flex}
-.mcard{width:520px;background:rgba(18,14,8,.97);border:2px solid #c9a227;border-radius:10px;
+.mcard{width:min(520px,92vw);background:rgba(18,14,8,.97);border:2px solid #c9a227;border-radius:10px;
   padding:26px 28px;display:flex;flex-direction:column;gap:16px;box-shadow:0 24px 80px rgba(0,0,0,.9)}
 .mtitle{font-size:24px;color:#ffd75e;font-weight:700}
 .minput{height:64px;background:#0a1017;border:1px solid #2f5a7a;border-radius:6px;color:#eaf7ff;
@@ -142,22 +181,95 @@ to{box-shadow:0 18px 56px rgba(0,0,0,.8), inset 0 0 80px rgba(224,32,32,.18), 0 
 .mbtn.ok{background:#c9a227;color:#1a1305;border-color:#e9d085}
 .mbtn:active{filter:brightness(1.2)}
 
+/* 通用弹框 */
+.modal3{position:absolute;inset:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.68)}
+.modal3.show{display:flex}
+.m3card{width:min(620px,92vw);background:rgba(16,12,7,.98);border:2px solid #8a6d28;border-radius:10px;
+  padding:28px 30px;display:flex;flex-direction:column;gap:18px;box-shadow:0 26px 90px rgba(0,0,0,.95);position:relative}
+.m3card.gold{border-color:#e9d085;box-shadow:0 26px 90px rgba(0,0,0,.95),0 0 40px rgba(233,208,133,.5)}
+.m3x{position:absolute;right:14px;top:10px;width:34px;height:34px;display:none;align-items:center;justify-content:center;
+  color:#c9b06a;font-size:22px;cursor:pointer;border-radius:6px;user-select:none}
+.m3x.show{display:flex}
+.m3x:hover{background:rgba(201,162,39,.18);color:#ffd75e}
+.m3title{font-size:27px;color:#ffd75e;font-weight:700;letter-spacing:2px}
+.m3body{font-size:20px;line-height:1.65;color:#d8c9a0}
+.m3body b{color:#ffd75e;font-family:Consolas,monospace}
+.m3btns{display:flex;gap:14px}
+.m3btn{flex:1;height:60px;border-radius:6px;border:1px solid #6b531f;color:#d9c47f;font-size:20px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;background:rgba(0,0,0,.15)}
+.m3btn.ok{background:#c9a227;color:#1a1305;border-color:#e9d085}
+.m3btn.warn{color:#ff8a5c;border-color:#8a4028}
+.m3btn:active{filter:brightness(1.2)}
+
+/* 换股面板 */
+.modal4{position:absolute;inset:0;z-index:35;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.66)}
+.modal4.show{display:flex}
+.m4card{width:min(900px,94vw);max-height:760px;background:rgba(16,12,7,.98);border:2px solid #c9a227;border-radius:10px;
+  padding:24px 26px;display:flex;flex-direction:column;gap:14px;box-shadow:0 26px 90px rgba(0,0,0,.95)}
+.m4title{font-size:26px;color:#ffd75e;font-weight:700;letter-spacing:3px}
+.m4list{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:0}
+.m4item{border:1px solid #3d2f12;padding:12px 16px;background:rgba(255,255,255,.02);cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.m4item:hover{border-color:#c9a227;background:rgba(201,162,39,.08)}
+.m4item .t{font-size:20px;font-weight:700;color:#f0e2b8}
+.m4item .t em{font-style:normal;font-size:14px;color:#8b7439;margin-left:10px}
+.m4item .d{font-size:14px;color:#8a7a4e;line-height:1.35}
+.m4item.on{border-color:#e9d085;background:rgba(201,162,39,.14)}
+.m4foot{display:flex;justify-content:flex-end}
+
+/* 提示条 */
+.toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%) translateY(10px);z-index:70;
+  background:rgba(20,14,6,.96);border:1px solid #c9a227;border-radius:8px;padding:14px 26px;
+  font-size:20px;color:#ffd75e;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
 .up{color:#ff4a41}.down{color:#22d16a}.neutral{color:#e8e8e8}
 .good{color:#ff4a41}.bad{color:#22d16a}
+
+/* 难度皮肤 */
+body.diff-hard .probbox,body.diff-hell .probbox,body.diff-real .probbox{display:none}
+body.diff-hell .eventbox{height:330px}
+body.diff-hard .eventbox .good,body.diff-hard .eventbox .bad,
+body.diff-hell .eventbox .good,body.diff-hell .eventbox .bad,
+body.diff-real .eventbox .good,body.diff-real .eventbox .bad,
+body.diff-hard .minorbox .good,body.diff-hard .minorbox .bad,
+body.diff-hell .minorbox .good,body.diff-hell .minorbox .bad,
+body.diff-real .minorbox .good,body.diff-real .minorbox .bad{color:#dfe6ee!important}
 </style>
 </head>
 <body>
 <div id="bg"><div class="pane"></div><div class="pane"></div><div class="pane"></div></div><div id="bgdim"></div>
 
 <div id="stage">
+  <div class="diffbar" id="diffbar">
+    <div class="dwrap" data-d="novice">
+      <div class="dbtn on">新手</div>
+      <div class="ddesc">现版本 · 大事件 1 / 小事件 4 · 概率可见 · 杠杆 1/2/5/10 · 可充钱可换股</div>
+    </div>
+    <div class="dwrap" data-d="hard">
+      <div class="dbtn">困难</div>
+      <div class="ddesc">大事件 3 / 小事件 10 · 概率隐藏 · 杠杆 1/2/5 · 上交 12 次 · 手续费 0.05% · 退市 0.4%</div>
+    </div>
+    <div class="dwrap" data-d="hell">
+      <div class="dbtn">地狱</div>
+      <div class="ddesc">一只【？？？】 · 大事件 5 / 小事件 15 · 杠杆 1/2 · 手续费 0.5% · 禁换股 · 退市风险磨底</div>
+    </div>
+    <div class="dwrap" data-d="real">
+      <div class="dbtn">真实</div>
+      <div class="ddesc">一只【？？？】 · 事件在场不限、各自到期消失、天数×2.2 · T+1 · 禁换股禁充钱 · 日息 · 上交 33 次</div>
+    </div>
+  </div>
+
   <div class="namebox">
-    <div class="nb-name" id="stName">深洲物流</div>
+    <div class="nb-namewrap">
+      <div class="nb-name" id="stName">深洲物流</div>
+      <div class="nb-desc" id="stDesc"></div>
+    </div>
     <div class="nb-board" id="stBoard">主板（±10%）</div>
     <div class="nb-delist" id="stDelist">退</div>
     <div class="nb-spacer"></div>
     <div class="nb-stat">
       <div class="row">持仓<b id="posHands">空仓</b>　盈亏<b id="posPnl">0.00%</b></div>
-      <div class="row">杠杆<b id="posLev">1x</b>　距强平<b id="posLiq">—</b></div>
+      <div class="row">杠杆<b id="posLev">1x</b>　借<b id="posBorrow">—</b>　距强平<b id="posLiq">—</b></div>
       <div class="row">可用<b id="posCash">1.00 万</b></div>
     </div>
     <div class="nb-pos">
@@ -178,12 +290,7 @@ to{box-shadow:0 18px 56px rgba(0,0,0,.8), inset 0 0 80px rgba(224,32,32,.18), 0 
   </div>
 
   <div class="trade">
-    <div class="levs" id="levs">
-      <div class="lev on" data-l="1">1x</div>
-      <div class="lev" data-l="2">2x</div>
-      <div class="lev" data-l="5">5x</div>
-      <div class="lev" data-l="10">10x</div>
-    </div>
+    <div class="levs" id="levs"></div>
     <div class="handctl">
       <div class="hc-btn" id="hMinus">−</div>
       <input class="hc-num" id="hNum" value="1" inputmode="numeric" autocomplete="off">
@@ -219,10 +326,7 @@ to{box-shadow:0 18px 56px rgba(0,0,0,.8), inset 0 0 80px rgba(224,32,32,.18), 0 
 
     <div class="box eventbox">
       <div class="box-title">大 事 件</div>
-      <div class="eb-main">
-        <div class="ev-text neutral" id="evText"></div>
-        <div class="ev-sub" id="evSub"></div>
-      </div>
+      <div class="eb-main"><div id="evList"></div></div>
     </div>
 
     <div class="box minorbox">
@@ -233,12 +337,17 @@ to{box-shadow:0 18px 56px rgba(0,0,0,.8), inset 0 0 80px rgba(224,32,32,.18), 0 
     <div class="box ctrlbox">
       <div class="box-title">控 制</div>
       <div class="ctrl-row">
+        <div class="cbtn" id="btnPlayMode">自动</div>
+        <div class="cbtn gold" id="btnNext" style="display:none">下一天</div>
+        <div class="cbtn" id="btnSpeed">7.5 秒/根</div>
+      </div>
+      <div class="ctrl-row">
         <div class="cbtn gold" id="btnMoney">充钱</div>
         <div class="cbtn gold" id="btnStock">换股</div>
       </div>
       <div class="ctrl-row">
         <div class="cbtn warn" id="btnReset">重启</div>
-        <div class="cbtn" id="btnSpeed">7.5 秒/根</div>
+        <div class="cbtn" id="btnChargeInfo">上交 —</div>
       </div>
     </div>
   </div>
@@ -253,6 +362,31 @@ to{box-shadow:0 18px 56px rgba(0,0,0,.8), inset 0 0 80px rgba(224,32,32,.18), 0 
       </div>
     </div>
   </div>
+
+  <div class="modal3" id="modal3">
+    <div class="m3card" id="m3card">
+      <div class="m3x" id="m3x">✕</div>
+      <div class="m3title" id="m3Title"></div>
+      <div class="m3body" id="m3Body"></div>
+      <div class="m3btns" id="m3Btns"></div>
+    </div>
+  </div>
+
+  <div class="modal4" id="modal4">
+    <div class="m4card">
+      <div class="m4title">换 股</div>
+      <div class="m4list" id="m4list"></div>
+      <div class="m4foot"><div class="m3btn" id="m4cancel" style="width:200px">关 闭</div></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<div id="rotateHint">
+  <div class="ico">📱</div>
+  <div class="rh">请 横 屏</div>
+  <div class="hs">把手机横过来，按钮才看得见。<br>横屏后整页会自动缩放到屏幕宽度。</div>
 </div>
 
 <script>
@@ -261,28 +395,75 @@ const rnd=(a,b)=>a+Math.random()*(b-a);
 const rndi=(a,b)=>Math.floor(rnd(a,b+1));
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const stage=$('stage');
-function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080);stage.style.transform='scale('+s+')';}
+function fit(){
+  const w=innerWidth,h=innerHeight;
+  const small=w<1100;
+  if(small){
+    document.documentElement.classList.add('small-screen');
+    stage.style.transform='none';
+    stage.style.zoom=String(Math.round(w/1920*1000)/1000);
+  }else{
+    document.documentElement.classList.remove('small-screen');
+    stage.style.zoom='';
+    stage.style.transform='scale('+Math.min(w/1920,h/1080)+')';
+  }
+  checkOrientation();
+}
+/* 竖屏提示用 JS 判断，比媒体查询可靠（部分手机横屏后 orientation 仍报 portrait） */
+function checkOrientation(){
+  const el=$('rotateHint');
+  if(!el) return;
+  const portrait=innerHeight>innerWidth;
+  el.style.display=(portrait && innerWidth<1000)?'flex':'none';
+}
 addEventListener('resize',()=>{fit();resizeCanvas();draw();});fit();
 
 const RED='#ff4a41',GREEN='#22d16a',YEL='#ffd75e';
 const N_SHOW=44, LOT=100;
 let TICK=7500;
 
-/* ============ 股票池（10 只，四类） ============ */
-const STOCKS = [
-  {name:'肥鱼科技',board:'主板',limit:10,base:5},
-  {name:'肥鱼物流',board:'主板',limit:10,base:4},
-  {name:'肥鱼能源',board:'主板',limit:10,base:5},
-  {name:'肥鱼半导',board:'创业板',limit:20,base:9},
-  {name:'肥鱼软件',board:'创业板',limit:20,base:10},
-  {name:'肥鱼医疗',board:'创业板',limit:20,base:8},
-  {name:'肥鱼材料',board:'科创板',limit:20,base:11},
-  {name:'肥鱼芯片',board:'科创板',limit:20,base:10},
-  {name:'肥鱼电子',board:'北交所',limit:30,base:13},
-  {name:'肥鱼制药',board:'北交所',limit:30,base:12}
-];
+/* ============ 难度 ============ */
+const DIFFS={
+  novice:{label:'新手',bigMax:1,bigRate:0.10,smallRate:0.45,smallMax:4,
+    levs:[1,2,5,10],special:false,saw:false,charge:false,canMoney:true,canSwap:true,pool:'base',fee:0},
+  hard:{label:'困难',bigMax:3,bigRate:0.08,smallRate:0.52,smallMax:10,
+    levs:[1,2,5],special:true,saw:true,charge:true,canMoney:false,canSwap:true,pool:'extra',fee:0.0005,
+    chargeStart:2000,chargeMul:1.8,chargeEvery:50,chances:3,chargeMax:12},
+  hell:{label:'地狱',bigMax:5,bigRate:0.20,smallRate:0.85,smallMax:15,
+    levs:[1,2],special:true,saw:true,charge:true,canMoney:false,canSwap:false,pool:'hell',fee:0.005,
+    chargeStart:2000,chargeMul:1.8,chargeEvery:50,chances:3,chargeMax:12,daysMul:1.5,stMode:true},
+  real:{label:'真实',bigMax:999,bigRate:0.30,smallRate:0.95,smallMax:999,
+    levs:[1,2],special:true,saw:true,charge:true,canMoney:false,canSwap:false,pool:'hell',fee:0.005,
+    chargeStart:2000,chargeMul:1.8,chargeEvery:50,chances:3,chargeMax:33,daysMul:2.2,stMode:true,
+    tPlus1:true,interest:0.0005,noMiracle:true}
+};
+const CHAIN=['novice','hard','hell','real'];
+function nextDiff(k){ const i=CHAIN.indexOf(k); return CHAIN[Math.min(i+1,CHAIN.length-1)]; }
+function DIFF(){ return DIFFS[S.diff]; }
 
-/* ============ 事件库（每类 8 条） ============ */
+/* ============ 股票池 ============ */
+const STOCKS = [
+  {name:'肥鱼科技',board:'主板',limit:10,base:5,desc:'光模块与算力板卡，吃 AI 订单的周期股，涨得慢跌得也慢'},
+  {name:'肥鱼物流',board:'主板',limit:10,base:4,desc:'干线运输与仓储，盈利稳定但没有想象空间，典型的防御票'},
+  {name:'肥鱼能源',board:'主板',limit:10,base:5,desc:'火电与新能源装机各占一半，看煤价和电价吃饭'},
+  {name:'肥鱼半导',board:'创业板',limit:20,base:9,desc:'晶圆代工，产能一开就是钱，产能一停就是雷'},
+  {name:'肥鱼软件',board:'创业板',limit:20,base:10,desc:'政企软件服务商，回款慢、概念多，最容易讲重组故事'},
+  {name:'肥鱼医疗',board:'创业板',limit:20,base:8,desc:'器械与耗材，集采一刀下来能腰斩，创新管线落地能翻倍'},
+  {name:'肥鱼材料',board:'科创板',limit:20,base:11,desc:'半导体材料，国产替代的旗手，波动全看政策和订单'},
+  {name:'肥鱼芯片',board:'科创板',limit:20,base:10,desc:'自研 GPU，研发烧钱无底洞，一次流片成功就鸡犬升天'},
+  {name:'肥鱼电子',board:'北交所',limit:30,base:13,desc:'小市值消费电子，流动性差，一根大单就能拉出涨停'},
+  {name:'肥鱼制药',board:'北交所',limit:30,base:12,desc:'仿制药加一条创新药管线，临床数据决定生死'}
+];
+/* 地狱 / 真实：只剩一只，名字是【？？？】 */
+const MYST = {
+  name:'【？？？】',board:'',limit:10,base:5,
+  desc:'不对外的票。名字被抹掉，涨跌被按在 ±10% 里，事件一天一个，谁也不告诉你是谁'
+};
+function stockPool(){
+  return (S.diff==='hell'||S.diff==='real') ? [MYST] : STOCKS;
+}
+
+/* ============ 事件库 ============ */
 const EV = {
   '主板':[
     {t:'业绩预增',k:'good',m:'bias',v:0.76,d:[5,9]},
@@ -325,6 +506,50 @@ const EV = {
     {t:'业绩预减',k:'bad',m:'bias',v:0.26,d:[5,10]}
   ]
 };
+const EV_EXTRA = {
+  '主板':[
+    {t:'资产重组',k:'good',m:'bias',v:0.80,d:[5,9]},
+    {t:'高送转',k:'good',m:'range',v:1.6,d:[4,7]},
+    {t:'大额减持',k:'bad',m:'bias',v:0.30,d:[5,9]},
+    {t:'业绩变脸',k:'bad',m:'bias',v:0.24,d:[5,9]},
+    {t:'中标大单',k:'good',m:'bias',v:0.72,d:[4,8]},
+    {t:'环保处罚',k:'bad',m:'bias',v:0.32,d:[4,7]}
+  ],
+  '创业板':[
+    {t:'海外订单',k:'good',m:'bias',v:0.78,d:[5,9]},
+    {t:'股权激励',k:'good',m:'range',v:1.5,d:[4,8]},
+    {t:'实控人变更',k:'neutral',m:'range',v:2.2,d:[5,10]},
+    {t:'商誉暴雷',k:'bad',m:'pin',v:-1,d:[2,4]},
+    {t:'定增终止',k:'bad',m:'bias',v:0.28,d:[4,8]},
+    {t:'技术授权',k:'good',m:'bias',v:0.70,d:[5,9]}
+  ],
+  '科创板':[
+    {t:'首发订单',k:'good',m:'bias',v:0.80,d:[5,10]},
+    {t:'科创基金建仓',k:'good',m:'range',v:1.8,d:[5,9]},
+    {t:'核心人员流失',k:'bad',m:'bias',v:0.22,d:[5,9]},
+    {t:'补贴退坡',k:'bad',m:'bias',v:0.26,d:[5,9]},
+    {t:'国际认证',k:'good',m:'bias',v:0.76,d:[4,8]},
+    {t:'临床试验失败',k:'bad',m:'pin',v:-1,d:[1,3]}
+  ],
+  '北交所':[
+    {t:'机构集中调研',k:'good',m:'bias',v:0.76,d:[4,8]},
+    {t:'转板受理',k:'good',m:'pin',v:1,d:[1,3]},
+    {t:'做市商退出',k:'bad',m:'range',v:1.8,d:[4,8]},
+    {t:'股东质押',k:'bad',m:'bias',v:0.30,d:[5,9]},
+    {t:'业绩快报超预期',k:'good',m:'bias',v:0.78,d:[5,9]},
+    {t:'流动性警告',k:'bad',m:'bias',v:0.25,d:[4,8]}
+  ]
+};
+const EV_HELL = [
+  {t:'董事长失联',k:'bad',m:'bias',v:0.18,d:[5,9]},
+  {t:'财务造假立案',k:'bad',m:'pin',v:-1,d:[2,4]},
+  {t:'神秘资金扫货',k:'good',m:'pin',v:1,d:[2,4]},
+  {t:'做空报告',k:'bad',m:'bias',v:0.20,d:[5,9]},
+  {t:'央行降准',k:'good',m:'bias',v:0.82,d:[6,12]},
+  {t:'监管立案',k:'bad',m:'bias',v:0.16,d:[5,10]},
+  {t:'国家队入场',k:'good',m:'bias',v:0.80,d:[5,10]},
+  {t:'退市风险警示',k:'bad',m:'bias',v:0.14,d:[4,8]}
+];
 const SMALL=[
   {t:'获授专利',k:'good',v:0.64},
   {t:'研报上调',k:'good',v:0.66},
@@ -335,28 +560,143 @@ const SMALL=[
   {t:'减持传闻',k:'bad',v:0.38},
   {t:'成交异常',k:'bad',v:0.36},
   {t:'高管变动',k:'neutral',v:0.50},
-  {t:'成本上升',k:'bad',v:0.40}
+  {t:'成本上升',k:'bad',v:0.40},
+  {t:'机构上调',k:'good',v:0.65},
+  {t:'中标公告',k:'good',v:0.63},
+  {t:'分红预案',k:'good',v:0.61},
+  {t:'业绩快报',k:'good',v:0.67},
+  {t:'调研纪要',k:'neutral',v:0.53},
+  {t:'股权质押',k:'bad',v:0.37},
+  {t:'诉讼进展',k:'bad',v:0.39},
+  {t:'限售解禁',k:'bad',v:0.35},
+  {t:'媒体质疑',k:'bad',v:0.34},
+  {t:'订单延期',k:'bad',v:0.38}
 ];
 
 const S = {
   idx:0, stock:null, price:0, bars:[], lastPct:0,
-  big:null, minor:[], tick:0, bankrupt:null,
+  bigs:[], minor:[], tick:0, bankrupt:null,
   mine:{cash:10000, pos:null, lev:1, wantHands:1},
-  upP:0.5, drift:0, baseCapital:10000
+  upP:0.5, drift:0, baseCapital:10000,
+  diff:'novice', playMode:'auto', paused:false, spec:null,
+  charge:{n:0, owed:0, chances:3}
 };
 
-/* ============ 装载股票（不重置资金） ============ */
+/* ============ 音效 ============ */
+let AC=null;
+function A(){
+  if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+  if(AC&&AC.state==='suspended') AC.resume();
+  return AC;
+}
+function tone(freq,t0,dur,type,gain){
+  const c=A(); if(!c) return;
+  const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+t0;
+  o.type=type||'sine'; o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(gain||0.18,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g);g.connect(c.destination);
+  o.start(t);o.stop(t+dur+0.03);
+}
+function sfxOpen(){
+  tone(880,0,0.10,'square',0.16);
+  tone(1320,0.02,0.16,'sine',0.12);
+  tone(1760,0.05,0.10,'sine',0.08);
+}
+function sfxWin(){
+  for(let i=0;i<5;i++) tone(1500+Math.random()*1300,i*0.055,0.20,'triangle',0.13);
+  tone(180,0.02,0.30,'sine',0.12);
+  tone(2400,0.32,0.16,'sine',0.07);
+}
+function sfxLose(){
+  // 失败音效：三连下滑 + 一声闷响
+  tone(440,0,0.16,'sawtooth',0.13);
+  tone(330,0.12,0.18,'sawtooth',0.13);
+  tone(220,0.26,0.30,'sawtooth',0.12);
+  tone(110,0.30,0.55,'sine',0.16);
+}
+
+/* 地狱 / 真实专属：一只票的定制事件库，五花八门、带联动 */
+const MYST_EVENTS=[
+  {t:'业绩预增',k:'good',d:[4,8],link:'机构调研'},
+  {t:'扭亏为盈',k:'good',d:[5,9],link:'摘帽预期'},
+  {t:'大额回购',k:'good',d:[4,7]},
+  {t:'高送转',k:'good',d:[3,6]},
+  {t:'机构调研',k:'good',d:[3,5]},
+  {t:'北向资金扫货',k:'good',d:[4,8],link:'游资锁仓'},
+  {t:'游资锁仓',k:'good',d:[3,6]},
+  {t:'并购重组',k:'good',d:[6,10],link:'借壳传闻'},
+  {t:'借壳传闻',k:'good',d:[3,6]},
+  {t:'中标大单',k:'good',d:[4,7]},
+  {t:'核心专利获批',k:'good',d:[5,9]},
+  {t:'产能满载',k:'good',d:[5,8]},
+  {t:'产品涨价',k:'good',d:[4,8]},
+  {t:'海外订单',k:'good',d:[5,9]},
+  {t:'政策补贴',k:'good',d:[4,7]},
+  {t:'纳入指数',k:'good',d:[4,8]},
+  {t:'大股东增持',k:'good',d:[3,6]},
+  {t:'股权激励',k:'good',d:[4,7]},
+  {t:'摘帽预期',k:'good',d:[4,8]},
+  {t:'AI 概念加持',k:'good',d:[3,7],link:'游资锁仓'},
+  {t:'业绩暴雷',k:'bad',d:[5,9],link:'商誉减值'},
+  {t:'商誉减值',k:'bad',d:[4,8]},
+  {t:'大股东减持',k:'bad',d:[4,7],link:'质押爆仓'},
+  {t:'质押爆仓',k:'bad',d:[3,6]},
+  {t:'监管立案',k:'bad',d:[6,10],link:'债务违约'},
+  {t:'问询函',k:'bad',d:[4,8]},
+  {t:'限售解禁',k:'bad',d:[4,7]},
+  {t:'财务造假传闻',k:'bad',d:[5,9],link:'审计保留意见'},
+  {t:'审计保留意见',k:'bad',d:[4,8]},
+  {t:'大客户流失',k:'bad',d:[5,9]},
+  {t:'核心人员离职',k:'bad',d:[3,6]},
+  {t:'环保处罚',k:'bad',d:[4,7]},
+  {t:'安全事故',k:'bad',d:[4,7]},
+  {t:'诉讼缠身',k:'bad',d:[5,9]},
+  {t:'债务违约',k:'bad',d:[5,9]},
+  {t:'股权冻结',k:'bad',d:[4,8]},
+  {t:'退市风险提示',k:'bad',d:[4,8]},
+  {t:'做空报告',k:'bad',d:[5,9],link:'财务造假传闻'},
+  {t:'停牌复牌',k:'neutral',d:[2,4]},
+  {t:'股东会',k:'neutral',d:[3,5]},
+  {t:'行业会议',k:'neutral',d:[3,5]},
+  {t:'问询回复',k:'neutral',d:[3,5]},
+  {t:'一字涨停',k:'good',d:[1,3],pin:1},
+  {t:'连续涨停',k:'good',d:[2,4],pin:1},
+  {t:'地天板',k:'good',d:[1,2],pin:1},
+  {t:'闪崩跌停',k:'bad',d:[1,2],pin:-1},
+  {t:'连续跌停',k:'bad',d:[2,4],pin:-1},
+  {t:'天地板',k:'bad',d:[1,2],pin:-1}
+];
+
+/* ============ 事件池 ============ */
+function bigPool(){
+  if(S.diff==='hell'||S.diff==='real') return MYST_EVENTS;
+  const st=S.stock, base=EV[st.board]||EV['主板'];
+  const D=DIFF();
+  if(D.pool==='base') return base;
+  const extra=EV_EXTRA[st.board]||EV_EXTRA['主板'];
+  let pool=base.concat(extra);
+  if(D.pool==='hell') pool=pool.concat(EV_HELL);
+  return pool;
+}
+
+/* ============ 装载股票 ============ */
 function loadStock(i, keepMoney){
-  S.idx=((i%STOCKS.length)+STOCKS.length)%STOCKS.length;
-  const st=STOCKS[S.idx];
+  const pool=stockPool();
+  S.idx=((i%pool.length)+pool.length)%pool.length;
+  const st=pool[S.idx];
+  const D=DIFF();
   S.stock=st;
   S.price=+(rnd(8,60)).toFixed(2);
-  S.bars=[];S.big=null;S.minor=[];S.lastPct=0;S.bankrupt=null;S.upP=0.5;S.drift=0;
-  if(S.mine.pos) S.mine.cash += S.mine.pos.margin;   // 换股/退市时按成本退保证金
+  S.bars=[];S.bigs=[];S.minor=[];S.lastPct=0;S.bankrupt=null;S.upP=0.5;S.drift=0;S.spec=null;
+  if(S.mine.pos) S.mine.cash += S.mine.pos.margin;
   S.mine.pos=null;
   if(!keepMoney) S.mine.cash=10000;
+  if(!D.levs.includes(S.mine.lev)) S.mine.lev=D.levs[0];
   $('stName').textContent=st.name;
-  $('stBoard').textContent=st.board+'（±'+st.limit+'%）';
+  $('stDesc').textContent=st.desc||'';
+  $('stBoard').textContent=st.board?(st.board+'（±'+st.limit+'%）'):('±'+st.limit+'%');
   $('stDelist').style.display='none';
   document.querySelector('.eventbox').classList.remove('bankrupt');
   for(let n=0;n<N_SHOW+16;n++){
@@ -367,47 +707,59 @@ function loadStock(i, keepMoney){
     S.price=c;
   }
   S.lastPct=S.bars[S.bars.length-1].pct;
+  renderLevs();
   setHands(S.mine.wantHands);
-  paint();draw();renderEvents();renderProb();
+  paint();draw();renderEvents();renderProb();updateChargeBtn();
 }
 
 /* ============ 主循环 ============ */
 function step(){
-  const st=S.stock;
+  if(S.paused) return;
   S.tick++;
+  const D=DIFF();
 
   if(S.bankrupt){ bankruptTick(); return; }
+  if(S.spec){ specTick(); return; }
 
-  if(!S.big && Math.random()<0.10) fireBig();
-  if(S.minor.length<4 && Math.random()<0.45) fireSmall();   // 小事件更频繁
+  fireBig();
+  if(S.minor.length<D.smallMax && Math.random()<D.smallRate) fireSmall();
   tickDown();
 
-  // 破产判定：2%（原 3%）
-  if(Math.random()<0.02) { startBankrupt(); return; }
+  if(D.stMode){
+    if(Math.random()<stChance()){ startBankrupt(); return; }   // stMode 下 startBankrupt 走退市风险
+  } else if(Math.random()<0.004){ startBankrupt(); return; }
 
-  // 概率：基础 50%，事件改
-  let range=st.base, upP=0.5, pin=0;
-  if(S.big){
-    if(S.big.m==='pin') pin=S.big.v;
-    else if(S.big.m==='bias') upP=S.big.v;
-    else if(S.big.m==='range') range*=S.big.v;
-  }
-  let bias=0;
-  S.minor.forEach(m=>{
-    let w=1;
-    if(S.big && S.big.m==='bias') w=((m.v>0.5)===(S.big.v>0.5))?1.5:0.5;
-    bias+=(m.v-0.5)*w;
+  const st=S.stock;
+  // 大事件按红绿计数：每红 +25%，每绿 -25%，三同向直接封板
+  let red=0,green=0,pin=0;
+  S.bigs.forEach(b=>{
+    if(b.m==='pin') pin=b.v;
+    else if(b.k==='good') red++;
+    else if(b.k==='bad') green++;
   });
-  upP=clamp(upP+bias,0.05,0.95);
+  // 事件越多波动越大
+  let range=st.base*(1+0.22*S.bigs.length+0.10*S.minor.length);
+  range=Math.min(range, st.base*3.2);
 
-  // 资金影响：持仓越重，越推动价格往自己的方向走
+  if(!pin){
+    if(red>=3) pin=1;
+    else if(green>=3) pin=-1;
+  }
+  let upP=0.5;
+  if(!pin){
+    upP=0.5+0.25*(red-green);
+    let b2=0;
+    S.minor.forEach(m=>{ b2+=(m.v-0.5); });
+    upP=clamp(upP+b2,0.05,0.95);
+  }
+
   let impact=0;
   const p=S.mine.pos;
   if(p){
     const val=p.hands*LOT*S.price;
-    const push=clamp(val/1200000,0,0.06);   // 120 万仓位约推 6%
+    const push=clamp(val/1200000,0,0.06);
     impact=p.dir*push;
-    upP=clamp(upP+impact*2,0.05,0.95);
+    if(!pin) upP=clamp(upP+impact*2,0.05,0.95);
   }
 
   S.upP=pin?(pin>0?1:0):upP;
@@ -416,13 +768,27 @@ function step(){
   if(pin) pct=pin*st.limit;
   else {
     pct=(Math.random()<S.upP?1:-1)*Math.random()*range;
-    pct+=impact*100*0.5;                       // 资金推动的当日偏移
+    pct+=impact*100*0.5;
     pct=clamp(pct,-st.limit,st.limit);
+    // 地铁难度：前一根大涨后一根大跌的锯齿
+    if(DIFF().saw && S.bars.length){
+      const prev=S.bars[S.bars.length-1].pct;
+      if(Math.abs(prev)>2.5 && Math.random()<0.55){
+        pct=clamp(-Math.sign(prev)*Math.abs(prev)*rnd(0.85,1.25),-st.limit,st.limit);
+      }
+    }
   }
 
   pushBar(pct);
+  // 真实档：持仓按天收利息
+  if(DIFF().interest && S.mine.pos){
+    const it=S.mine.pos.hands*LOT*S.price*DIFF().interest;
+    S.mine.cash-=it;
+  }
   checkLiquidation();
   paint();draw();renderEvents();renderProb();
+
+  maybeCharge();
 }
 
 function pushBar(pct){
@@ -432,31 +798,162 @@ function pushBar(pct){
   S.price=c;S.lastPct=pct;
 }
 
+/* ============ 大事件 ============ */
 function fireBig(){
-  const pool=EV[S.stock.board]||EV['主板'];
+  const D=DIFF();
+  if(maybeSpecialBig()) return;
+  const normals=S.bigs.filter(b=>!b.special).length;
+  if(normals>=D.bigMax) return;
+  if(Math.random()>=D.bigRate) return;
+  const pool=bigPool();
   const e=pool[rndi(0,pool.length-1)];
-  const d=rndi(e.d[0],e.d[1]);
-  S.big={t:e.t,k:e.k,m:e.m,v:e.v,left:d,days:d};
+  if(S.bigs.some(b=>b.t===e.t)) return;
+  if(e.pin && S.bigs.some(b=>b.m==='pin' && b.v!==e.pin)) return;   // 不叠反向封板
+  const mul=D.daysMul||1;
+  const d=Math.max(2,Math.round(rndi(e.d[0],e.d[1])*mul));
+  if(e.pin){
+    S.bigs.push({t:e.t,k:e.k,m:'pin',v:e.pin,left:d,days:d,special:true});
+  }else{
+    S.bigs.push({t:e.t,k:e.k,m:'bias',v:e.k==='good'?0.75:e.k==='bad'?0.25:0.5,left:d,days:d});
+  }
+  // 联动：带出一条后续事件
+  if(e.link && Math.random()<0.45){
+    const l=pool.find(x=>x.t===e.link);
+    if(l && !S.bigs.some(b=>b.t===l.t)){
+      const dl=Math.max(2,Math.round(rndi(l.d[0],l.d[1])*mul));
+      if(l.pin) S.bigs.push({t:l.t,k:l.k,m:'pin',v:l.pin,left:dl,days:dl,special:true,linked:true});
+      else S.bigs.push({t:l.t,k:l.k,m:'bias',v:l.k==='good'?0.75:l.k==='bad'?0.25:0.5,left:dl,days:dl,linked:true});
+    }
+  }
+  renderEvents();
+}
+/* 第二个大事件：追红追绿的人吃反向杀招 */
+function maybeSpecialBig(){
+  const D=DIFF();
+  if(S.diff==='hell'||S.diff==='real') return false;   // 这两档用退市风险/摘帽 + 事件池里的涨跌停
+  if(!D.special) return false;
+  if(S.bankrupt) return false;
+  if(S.bigs.some(b=>b.special)) return false;
+  const normals=S.bigs.filter(b=>!b.special);
+  if(normals.length!==1) return false;
+  const last=normals[0];
+  const p=S.mine.pos;
+  const chase=p && ((last.k==='good'&&p.dir>0)||(last.k==='bad'&&p.dir<0));
+  const ch=chase?0.22:0.05;
+  if(Math.random()>=ch) return false;
+  if(chase && p){
+    if(p.dir>0) startBankrupt();        // 追多 → 退市跌停
+    else fireLimitUp();                 // 追空 → 封死涨停
+  }else{
+    if(Math.random()<0.5) startBankrupt(); else fireLimitUp();
+  }
+  return true;
+}
+function fireLimitUp(){
+  const d=rndi(2,4);
+  S.bigs.push({t:'封死涨停',k:'good',m:'pin',v:1,left:d,days:d,special:true});
   renderEvents();
 }
 function fireSmall(){
   const e=SMALL[rndi(0,SMALL.length-1)];
   if(S.minor.some(m=>m.t===e.t)) return;
-  const d=rndi(4,9);
+  const d=Math.max(2,Math.round(rndi(4,9)*(DIFF().daysMul||1)));
   S.minor.push({t:e.t,k:e.k,m:'bias',v:e.v,left:d,days:d});
   renderEvents();
 }
 function tickDown(){
-  if(S.big && --S.big.left<=0) S.big=null;
+  for(let i=S.bigs.length-1;i>=0;i--){
+    if(S.bigs[i].special && S.bigs[i].t==='破产退市') continue;
+    if(--S.bigs[i].left<=0) S.bigs.splice(i,1);
+  }
   for(let i=S.minor.length-1;i>=0;i--) if(--S.minor[i].left<=0) S.minor.splice(i,1);
 }
 
-/* ============ 破产退市 ============ */
+/* 退市风险触发概率：随事件加减，不写死 */
+function stChance(){
+  const red=S.bigs.filter(b=>b.k==='good').length;
+  const green=S.bigs.filter(b=>b.k==='bad').length;
+  const mBad=S.minor.filter(m=>m.k==='bad').length;
+  let c=0.0025;                      // 基础 0.25%/根
+  c+=green*0.0015;                   // 每个负面大事件 +0.15%
+  c-=red*0.0010;                     // 每个正面大事件 -0.10%
+  c+=mBad*0.0004;                    // 每个负面小事件 +0.04%
+  if(S.lastPct<-3) c+=0.002;         // 刚跌过 -3% 再加一点
+  return clamp(c,0.0005,0.015);
+}
+/* ============ 退市风险 / 摘帽（地狱·真实） ============ */
+function triggerST(){
+  S.minor=[];S.bigs=[];
+  S.spec={type:'st',phase:'smash',left:3,day:0};
+  S.bigs.push({t:'退市风险警示',k:'bad',m:'pin',v:-1,left:3,days:3,special:true});
+  document.querySelector('.eventbox').classList.add('bankrupt');
+  renderEvents();renderProb();
+  toast('收到退市风险警示：先连续跌停，再在底下磨');
+}
+function triggerHat(){
+  const left=rndi(4,7);
+  S.spec={type:'hat',left};
+  S.bigs=[{t:'摘帽',k:'good',m:'pin',v:1,left,days:left,special:true}];
+  document.querySelector('.eventbox').classList.remove('bankrupt');
+  renderEvents();renderProb();
+  toast('摘帽了：一路涨停');
+}
+function specTick(){
+  if(!S.spec) return;
+  const st=S.stock;
+  if(S.spec.type==='hat'){
+    S.spec.left--;
+    if(S.spec.left<=0){
+      endSpec(); pushBar(st.limit);
+      checkLiquidation();paint();draw();renderEvents();renderProb();
+      return;
+    }
+    pushBar(st.limit);
+    if(S.bigs[0]) S.bigs[0].left=S.spec.left;
+  }else if(S.spec.phase==='smash'){
+    // 砸盘：连续一字跌停
+    S.spec.left--;
+    if(S.spec.left<=0){ S.spec.phase='bottom'; if(S.bigs[0]) S.bigs[0].grind=true; }
+    pushBar(-st.limit);
+  }else{
+    // 磨底：±2% 墨迹，摘帽概率逐日升高，偶尔冒个事件打破平静
+    S.spec.day=(S.spec.day||0)+1;
+    const hc=clamp(0.09+S.spec.day*0.03,0.09,0.5);
+    if(Math.random()<hc){
+      triggerHat(); pushBar(st.limit);
+    }else if(Math.random()<0.04){
+      const pool=bigPool();
+      const e=pool[rndi(0,pool.length-1)];
+      if(e && !e.pin && !S.bigs.some(b=>b.t===e.t)){
+        const d=Math.max(2,Math.round(rndi(e.d[0],e.d[1])*(DIFF().daysMul||1)));
+        S.bigs.push({t:e.t,k:e.k,m:'bias',v:e.k==='good'?0.75:e.k==='bad'?0.25:0.5,left:d,days:d});
+        pushBar((e.k==='good'?1:-1)*rnd(4,8));
+        toast('突发：'+e.t);
+      }else{
+        pushBar(rnd(-2,2));
+      }
+    }else{
+      pushBar(rnd(-2,2));
+    }
+    if(S.bigs[0]) S.bigs[0].left=S.spec.day;
+  }
+  checkLiquidation();paint();draw();renderEvents();renderProb();
+  maybeCharge();
+}
+function endSpec(){
+  S.spec=null;S.bigs=[];
+  document.querySelector('.eventbox').classList.remove('bankrupt');
+  renderEvents();
+}
+
+/* ============ 破产退市（新手·困难） ============ */
 function startBankrupt(){
+  if(DIFF().stMode){ triggerST(); return; }
   const left=rndi(5,8);
-  S.bankrupt={left, miracle:Math.random()<0.5, miracleAt:Math.max(2,left-rndi(2,4))};
+  const noM=!!DIFF().noMiracle;
+  S.bankrupt={left, miracle:!noM && Math.random()<0.5, miracleAt:Math.max(2,left-rndi(2,4))};
   S.minor=[];
-  S.big={t:'破产退市',k:'bad',m:'pin',v:-1,left:99,days:99};
+  S.bigs=[{t:'破产退市',k:'bad',m:'pin',v:-1,left:99,days:99,special:true}];
   $('stDelist').style.display='block';
   document.querySelector('.eventbox').classList.add('bankrupt');
   renderEvents();
@@ -466,7 +963,7 @@ function bankruptTick(){
   S.bankrupt.left--;
   if(S.bankrupt.miracle && S.bankrupt.left<=S.bankrupt.miracleAt){
     pushBar(rnd(6,20));
-    S.big=null;S.bankrupt=null;
+    S.bigs=[];S.bankrupt=null;
     $('stDelist').style.display='none';
     document.querySelector('.eventbox').classList.remove('bankrupt');
     paint();draw();renderEvents();renderProb();
@@ -476,11 +973,11 @@ function bankruptTick(){
   checkLiquidation();
   if(!S.bankrupt){ paint();draw();renderEvents();renderProb(); return; }
   if(S.bankrupt.left<=0){
-    settlePosition();        // 退市换股前按最后价结算持仓
-    S.bankrupt=null;S.big=null;
+    settlePosition();
+    S.bankrupt=null;S.bigs=[];
     $('stDelist').style.display='none';
     document.querySelector('.eventbox').classList.remove('bankrupt');
-    loadStock(S.idx+1, true);   // 换股，资金保留
+    loadStock(S.idx+1, true);
     return;
   }
   paint();draw();renderEvents();renderProb();
@@ -497,29 +994,36 @@ function setHands(n){
   $('hNum').value=S.mine.wantHands;
 }
 function openPos(dir){
-  if(S.mine.pos){ return; }
+  if(S.mine.pos) return;
   const st=S.stock;
-  if(dir>0 && atLimitUp()) return;
-  if(dir<0 && atLimitDown()) return;
-  if(S.bankrupt && dir<0) return;
+  if(dir>0 && atLimitUp()){ toast('涨停封板，买不进 —— 只能做空'); return; }
+  if(dir<0 && atLimitDown()){ toast('跌停封板，卖不出 —— 只能做多'); return; }
+  if(S.bankrupt && dir<0){ return; }
   const mx=maxHands();
   if(mx<1) return;
   const hands=Math.min(Math.max(1,S.mine.wantHands),mx);
-  const amount=hands*LOT*S.price/S.mine.lev;
-  S.mine.cash-=amount;
+  let amount=hands*LOT*S.price/S.mine.lev;
+  const fee=amount*DIFF().fee;
+  if(S.mine.cash < amount+fee) return;
+  S.mine.cash-=amount+fee;
   S.mine.pos={hands,dir,lev:S.mine.lev,open:S.price,margin:amount,born:S.tick};
+  sfxOpen();
   paint();draw();
 }
 function closePos(){
   const p=S.mine.pos;
   if(!p) return;
-  if(S.bankrupt && p.dir>0) return;   // 退市时多单封死
+  if(DIFF().tPlus1 && S.tick<=p.born){ toast('T+1：当天买入不能当天平仓'); return; }
+  if(p.dir<0 && atLimitUp()){ toast('涨停封板，空单平不掉'); return; }
+  if(p.dir>0 && atLimitDown()){ toast('跌停封板，多单平不掉'); return; }
+  if(S.bankrupt && p.dir>0){ toast('退市封死，多单平不掉'); return; }
   const pnl=(S.price-p.open)*p.dir*p.hands*LOT;
-  S.mine.cash+=p.margin+pnl;
+  const fee=p.hands*LOT*S.price*DIFF().fee;
+  S.mine.cash+=p.margin+pnl-fee;
   S.mine.pos=null;
+  if(pnl>0) sfxWin(); else if(pnl<0) sfxLose();
   paint();draw();
 }
-/* 换股/退市：按当前价结算持仓。赚的照给，亏的最多亏光保证金（不倒欠） */
 function settlePosition(){
   const p=S.mine.pos;
   if(!p) return;
@@ -530,9 +1034,10 @@ function settlePosition(){
 function checkLiquidation(){
   const p=S.mine.pos;
   if(!p) return;
-  const move=(S.price-p.open)/p.open*p.dir;
-  if(move<=-1/p.lev){
+  const pnl=(S.price-p.open)*p.dir*p.hands*LOT;
+  if(p.margin+pnl<=0){
     S.mine.pos=null;
+    sfxLose();
     paint();
   }
 }
@@ -543,11 +1048,10 @@ function pnlPct(){
   if(!p) return 0;
   return (S.price-p.open)/p.open*p.dir*p.lev*100;
 }
-function liqPct(){
+function liqLeft(){
   const p=S.mine.pos;
-  if(!p||p.lev<=1) return null;
-  const liq=p.open*(1-1/p.lev*p.dir);
-  return Math.abs((S.price-liq)/S.price)*100;
+  if(!p) return null;
+  return p.margin+(S.price-p.open)*p.dir*p.hands*LOT;
 }
 function totalMine(){
   const p=S.mine.pos;
@@ -561,6 +1065,10 @@ function fmt(n){
   if(Math.abs(n)>=1e8) return (n/1e8).toFixed(2)+' 亿';
   if(Math.abs(n)>=1e4) return (n/1e4).toFixed(2)+' 万';
   return n.toFixed(0);
+}
+function fmt0(n){
+  const v=Math.round(n);
+  return v.toLocaleString('en-US');
 }
 function paint(){
   const pEl=$('stPrice');
@@ -576,9 +1084,10 @@ function paint(){
   $('posPnl').textContent=(pp>0?'+':'')+pp.toFixed(2)+'%';
   $('posPnl').className='v '+(pp>0?'up':pp<0?'down':'neutral');
   $('posLev').textContent=m.lev+'x';
-  const lq=liqPct();
-  $('posLiq').textContent=lq===null?'—':lq.toFixed(1)+'%';
-  $('posLiq').className='v '+(lq!==null&&lq<8?'down':'neutral');
+  $('posBorrow').textContent = pos ? ('¥'+fmt0(pos.margin*(pos.lev-1))) : '—';
+  const lq=liqLeft();
+  $('posLiq').textContent = lq===null ? '—' : ('¥'+fmt0(Math.max(0,lq)));
+  $('posLiq').className='v '+(lq!==null&&lq< (pos?pos.margin*0.25:0)?'down':'neutral');
   $('posCash').textContent=fmt(m.cash);
 
   const tot=totalMine();
@@ -591,35 +1100,45 @@ function paint(){
     const mx=maxHands();
     if(S.mine.wantHands>mx) setHands(mx);
   }
+  updateChargeBtn();
 }
 function renderEvents(){
-  const t=$('evText'),s=$('evSub');
-  if(S.big){
-    t.textContent='【'+S.big.t+'】';
-    t.className='ev-text '+S.big.k;
-    s.textContent = S.big.t==='破产退市'
-      ? (S.bankrupt?('跌停封死 · 还剩 '+S.bankrupt.left+' 根'):'封死')
-      : ('剩 '+S.big.left+' 天');
-    s.className='ev-sub '+S.big.k;
-  } else { t.textContent='';t.className='ev-text';s.textContent='';s.className='ev-sub'; }
-
-  const box=$('mbSlots');box.innerHTML='';
-  for(let i=0;i<4;i++){
-    const m=S.minor[i],d=document.createElement('div');
-    if(m){ d.className='mb-slot';
-      d.innerHTML='<div class="nm '+m.k+'">'+m.t+'</div><div class="fx">剩 '+m.left+' 天</div>';
-    } else { d.className='mb-idle';d.textContent=''; }
-    box.appendChild(d);
+  const box=$('evList');box.innerHTML='';
+  if(!S.bigs.length){
+    box.innerHTML='<div class="ev-empty">— 无 —</div>';
+  }else{
+    S.bigs.forEach(b=>{
+      const d=document.createElement('div');
+      d.className='ev-item'+(b.special?' spec':'');
+      let days=b.left;
+      if(b.t==='破产退市'&&S.bankrupt) days=S.bankrupt.left;
+      const unit=b.special?' 根':' 天';
+      const tail = b.grind ? ('磨底第 '+days+' 天') : ('剩 '+days+unit);
+      d.innerHTML='<span class="n '+b.k+'">【'+b.t+'】</span><span class="d">'+tail+'</span>';
+      d.onclick=()=>showEvent(b);
+      box.appendChild(d);
+    });
+  }
+  const mb=$('mbSlots');mb.innerHTML='';
+  const maxShow=DIFF().smallMax;
+  for(let i=0;i<maxShow;i++){
+    const m=S.minor[i];
+    if(!m) break;
+    const d=document.createElement('div');
+    d.className='mb-slot';
+    d.innerHTML='<div class="nm '+m.k+'">'+m.t+'</div><div class="fx">剩 '+m.left+' 天</div>';
+    d.onclick=()=>showEvent(m);
+    mb.appendChild(d);
   }
 }
 function renderProb(){
+  if(!DIFF().showProb) return;
   const up=Math.round(S.upP*1000)/10;
   const dn=Math.round((1-S.upP)*1000)/10;
   $('upVal').textContent=up.toFixed(1)+'%';
   $('downVal').textContent=dn.toFixed(1)+'%';
   $('upFill').style.width=up+'%';
   $('downFill').style.width=dn+'%';
-  // 强度分档：偏离 50% 越远颜色越亮
   const dev=Math.abs(S.upP-0.5);
   const upC = dev>0.06? '#ff2a1f' : dev>0.03? '#ff5a4a' : '#a83a34';
   const dnC = dev>0.06? '#12e06a' : dev>0.03? '#3ecc78' : '#2e7a4e';
@@ -628,8 +1147,9 @@ function renderProb(){
   $('upVal').style.color=upC;
   $('downVal').style.color=dnC;
   let note='纯随机';
-  if(S.big && S.big.m==='pin') note = (S.big.v>0?'涨停封板中':'跌停封板中');
-  else if(dev>0.03) note = (S.upP>0.5?'偏多':'偏空')+' · 偏离 '+((S.upP-0.5)*100).toFixed(1)+'%';
+  if(S.bigs.some(b=>b.m==='pin'&&b.v>0)) note='涨停封板中';
+  else if(S.bigs.some(b=>b.m==='pin'&&b.v<0)) note='跌停封板中';
+  else if(dev>0.03) note=(S.upP>0.5?'偏多':'偏空')+' · 偏离 '+((S.upP-0.5)*100).toFixed(1)+'%';
   $('probNote').textContent=note;
 }
 
@@ -668,7 +1188,6 @@ function draw(){
     ctx.fillText(p.toFixed(2),W-padR+10,y);
   }
 
-  // MA5 / MA10
   const nAll=S.bars.length,start=nAll-bars.length;
   [[5,'#7fc4ff'],[10,'#ffb347']].forEach(([n,color])=>{
     ctx.beginPath();let started=false;
@@ -722,6 +1241,225 @@ function draw(){
   ctx.fillStyle='#ffb347'; ctx.fillText('— MA10',padL+112,vTop-24);
 }
 
+/* ============ 计时 / 手动 ============ */
+let timer=null;
+function restartTimer(){
+  if(timer) clearInterval(timer);
+  timer=null;
+  if(S.playMode==='auto' && !S.paused) timer=setInterval(step,TICK);
+}
+function setPlayMode(m){
+  S.playMode=m;
+  S.paused=false;
+  $('btnPlayMode').textContent = m==='auto'?'自动':'手动';
+  $('btnNext').style.display = m==='manual'?'flex':'none';
+  restartTimer();
+}
+function pauseGame(){ S.paused=true; if(timer){clearInterval(timer);timer=null;} }
+function resumeGame(){ S.paused=false; if(S.playMode==='auto') restartTimer(); }
+
+/* ============ 通用弹框 ============ */
+let dlgCb=null;
+function showDlg(opt){
+  $('m3Title').textContent=opt.title||'';
+  $('m3Body').innerHTML=opt.body||'';
+  $('m3card').classList.toggle('gold',!!opt.gold);
+  $('m3x').classList.toggle('show',!!opt.closable);
+  const box=$('m3Btns');box.innerHTML='';
+  (opt.buttons||[{text:'确定',cls:'ok'}]).forEach(b=>{
+    const el=document.createElement('div');
+    el.className='m3btn '+(b.cls||'');
+    el.textContent=b.text;
+    el.onclick=()=>{ if(b.onClick) b.onClick(); };
+    box.appendChild(el);
+  });
+  $('modal3').classList.add('show');
+}
+$('m3x').onclick=()=>{ closeDlg(); resumeGame(); };
+
+/* 事件详情：按难度给不同详略 */
+function eventDetail(b){
+  const days=b.days||b.left;
+  const good=b.k==='good', bad=b.k==='bad';
+  if(S.diff==='novice'){
+    return '【'+b.t+'】<br><br>'+
+      (good?'<b style="color:#ff6b63">利好</b>事件。':bad?'<b style="color:#4ce08a">利空</b>事件。':'中性事件。')+
+      '<br>影响：'+(good?'上涨概率 <b>+25%</b>':bad?'下跌概率 <b>+25%</b>':'不改变方向')+
+      '，持续 <b>'+days+'</b> 天左右。<br><br>同时在场的消息越多，波动越大。';
+  }
+  if(S.diff==='hard'){
+    return '【'+b.t+'】<br><br>市场对这条消息的看法还不统一，方向要自己判断。<br>大概会持续 <b>'+days+'</b> 天上下。';
+  }
+  if(S.diff==='hell'){
+    return '【'+b.t+'】<br><br>公告已披露。没有更多说明。';
+  }
+  const filler=[
+    '该公司于近日收到相关方出具的《关于相关事项的告知函》，现将有关情况说明如下。',
+    '根据现行规则及公司内部流程，本次事项尚需履行必要的审议程序，具体影响金额以最终审计结果为准。',
+    '公司目前生产经营活动正常，各项业务有序开展，管理层将持续关注上述事项的进展。',
+    '公司将严格按照有关法律法规的要求，及时履行信息披露义务，敬请广大投资者理性投资、注意风险。',
+    '本公告不构成任何投资建议，投资者应独立判断并自行承担投资风险。'
+  ];
+  const key=good?'可能对经营产生一定的积极影响':bad?'可能对经营带来不确定性':'对经营无重大影响';
+  return '【'+b.t+'】<br><br>'+filler.join('<br>')+'<br><br>其中提到：<b>'+key+'</b>。<br>持续 '+days+' 天左右。';
+}
+function showEvent(b){
+  pauseGame();
+  showDlg({
+    title:'事件详情',
+    body:eventDetail(b),
+    closable:true,
+    buttons:[{text:'关 闭',cls:'ok',onClick:()=>{closeDlg();resumeGame();}}]
+  });
+}
+function closeDlg(){ $('modal3').classList.remove('show'); }
+/* 轻提示，不暂停 */
+let toastT=null;
+function toast(msg){
+  const el=$('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>el.classList.remove('show'),1600);
+}
+
+/* ============ 上交 ============ */
+function chargeAmount(n){
+  const D=DIFF();
+  return Math.round(D.chargeStart*Math.pow(D.chargeMul,n-1))+S.charge.owed;
+}
+function updateChargeBtn(){
+  const D=DIFF();
+  const el=$('btnChargeInfo');
+  if(!D.charge){ el.textContent='上交 —'; el.classList.add('dim'); return; }
+  if(S.charge.n>=D.chargeMax){ el.textContent='上交 · 已收满 '+D.chargeMax+' 次'; el.classList.add('dim'); return; }
+  el.classList.remove('dim');
+  const next=DIFF().chargeEvery-(S.tick%DIFF().chargeEvery);
+  el.textContent='上交 '+S.charge.n+'/'+D.chargeMax+' · 还'+next+'根';
+}
+function maybeCharge(){
+  const D=DIFF();
+  if(!D.charge) return;
+  if(S.charge.n>=D.chargeMax) return;   // 最高只收 chargeMax 次
+  if(S.tick===0 || S.tick%D.chargeEvery!==0) return;
+  S.charge.n++;
+  const amt=chargeAmount(S.charge.n);
+  pauseGame();
+  if(S.mine.cash<amt){
+    // 现金不足，自动强平
+    settlePosition();
+  }
+  showDlg({
+    title:'第 '+S.charge.n+' 次上交',
+    body:'交易所要收 <b>¥'+fmt0(amt)+'</b>。<br>当前现金 <b>¥'+fmt0(S.mine.cash)+'</b>　剩余机会 <b>'+S.charge.chances+'</b><br>'+
+      (S.mine.cash<amt?'<span style="color:#ff8a5c">现金不足，选择上交会自动强平持仓。</span>':''),
+    buttons:[
+      {text:'上交',cls:'ok',onClick:()=>doPayCharge(amt)},
+      {text:'拒绝',cls:'warn',onClick:()=>failCharge(amt)}
+    ]
+  });
+}
+function doPayCharge(amt){
+  const D=DIFF();
+  if(S.mine.cash<amt) settlePosition();
+  if(S.mine.cash>=amt){
+    S.mine.cash-=amt;
+    S.charge.owed=0;
+    closeDlg();
+    paint();renderEvents();
+    if(S.charge.n>=D.chargeMax){ afterChargeFull(); }
+    else resumeGame();
+  }else{
+    failCharge(amt);
+  }
+}
+/* 上交收满 */
+function afterChargeFull(){
+  pauseGame();
+  if(S.diff==='real'){
+    showDlg({
+      title:'全部游戏内容已完成',
+      body:'33 次上交全部结清。<br>这个游戏能给你的东西，你已经走完了。<br><br>后面想怎么玩都行。',
+      gold:true,
+      buttons:[
+        {text:'继续游玩',cls:'ok',onClick:()=>{closeDlg();resumeGame();}},
+        {text:'重新开始',cls:'',onClick:()=>{closeDlg();resetGame('real');}}
+      ]
+    });
+    return;
+  }
+  showDlg({
+    title:'你 已 获 胜',
+    body:'12 次上交全部结清，这个难度你通关了。<br><br>继续游玩当前难度，还是换个挑战？',
+    gold:true,
+    buttons:[
+      {text:'是 · 换个挑战',cls:'ok',onClick:()=>{ closeDlg(); setDiff(nextDiff(S.diff)); }},
+      {text:'否 · 继续玩',cls:'',onClick:()=>{ closeDlg(); resumeGame(); }}
+    ]
+  });
+}
+function failCharge(amt){
+  S.charge.chances--;
+  S.charge.owed=amt;   // amt 已含上次欠款，直接顶替，不重复累加
+  if(S.charge.chances<=0){ forfeit(); return; }
+  closeDlg();
+  showDlg({
+    title:'欠款挂账',
+    body:'这次没交成，<b>¥'+fmt0(amt)+'</b> 挂到下一次一起收。<br>剩余机会 <b>'+S.charge.chances+'</b> 次。',
+    buttons:[{text:'继续',cls:'ok',onClick:()=>{closeDlg();paint();resumeGame();}}]
+  });
+}
+function forfeit(){
+  S.mine.cash=0;
+  S.mine.pos=null;
+  closeDlg();
+  showDlg({
+    title:'剩余资金已被收缴',
+    body:'三次机会用完了。<br>你的资金已经清零。<br><br><span style="color:#ffd75e">点「重启」重新开始。</span>',
+    gold:true,
+    buttons:[{text:'重 启',cls:'ok',onClick:()=>{closeDlg();resetGame(S.diff);}}]
+  });
+}
+
+/* ============ 难度切换 ============ */
+function setDiff(k){
+  if(!DIFFS[k]) return;
+  closeDlg();
+  $('modal2').classList.remove('show');
+  $('modal4').classList.remove('show');
+  resetGame(k);
+  [...document.querySelectorAll('.dwrap')].forEach(el=>{
+    el.querySelector('.dbtn').classList.toggle('on',el.dataset.d===k);
+  });
+  document.body.className='diff-'+k;
+}
+function renderLevs(){
+  const D=DIFF(),box=$('levs');box.innerHTML='';
+  if(!D.levs.includes(S.mine.lev)) S.mine.lev=D.levs[0];
+  D.levs.forEach(l=>{
+    const d=document.createElement('div');
+    d.className='lev'+(l===S.mine.lev?' on':'');
+    d.dataset.l=l;d.textContent=l+'x';
+    box.appendChild(d);
+  });
+}
+function resetGame(k){
+  S.diff=k;
+  const D=DIFF();
+  S.baseCapital=10000;
+  S.mine.cash=10000;
+  S.mine.lev=D.levs[0];
+  S.mine.wantHands=1;
+  S.tick=0;
+  S.charge={n:0,owed:0,chances:D.chances||3};
+  renderLevs();
+  setPlayMode('auto');
+  loadStock(0,false);
+  $('btnMoney').classList.toggle('dim',!D.canMoney);
+  $('btnStock').classList.toggle('dim',!D.canSwap);
+  if(!D.showProb) $('probNote').textContent='';
+}
+
 /* ============ 交互 ============ */
 $('levs').addEventListener('click',e=>{
   const el=e.target.closest('.lev');if(!el||S.mine.pos) return;
@@ -744,7 +1482,10 @@ $('bLong').onclick=()=>openPos(1);
 $('bShort').onclick=()=>openPos(-1);
 $('bFlat').onclick=closePos;
 
-/* 自绘输入框（浏览器 prompt/confirm 有时被拦，点了没反应） */
+$('btnPlayMode').onclick=()=>setPlayMode(S.playMode==='auto'?'manual':'auto');
+$('btnNext').onclick=()=>{ if(S.playMode==='manual'&&!S.paused) step(); };
+
+/* 自绘输入框 */
 let mCb=null;
 function askNum(title,def,cb){
   mCb=cb;
@@ -762,30 +1503,42 @@ $('mOk').onclick=()=>{
 $('mCancel').onclick=()=>{ $('modal2').classList.remove('show'); mCb=null; };
 $('mInput').addEventListener('keydown',e=>{ if(e.key==='Enter') $('mOk').click(); if(e.key==='Escape') $('mCancel').click(); });
 
-$('btnMoney').onclick=()=>askNum('加多少万？（负数=扣）','10',v=>{
-  const n=parseFloat(v);
-  if(!isFinite(n)||n===0) return;
-  S.mine.cash+=n*10000;
-  paint();
-});
-$('btnStock').onclick=()=>{
-  const names=STOCKS.map((s,i)=>(i+1)+'. '+s.name+'（'+s.board+'）').join('  ');
-  const next=(S.idx+1)%STOCKS.length+1;
-  askNum('换哪只？1-'+STOCKS.length+'（资金保留、仓位清空）  '+names, String(next), v=>{
-    const n=parseInt(v);
-    if(!isFinite(n)||n<1||n>STOCKS.length) return;
-    settlePosition();          // 手动换股前按当前价结算持仓
-    loadStock(n-1,true);
+$('btnMoney').onclick=()=>{
+  if(!DIFF().canMoney) return;
+  askNum('加多少万？（负数=扣）','10',v=>{
+    const n=parseFloat(v);
+    if(!isFinite(n)||n===0) return;
+    S.mine.cash+=n*10000;
+    paint();
   });
 };
+/* 换股面板 */
+function openSwap(){
+  const D=DIFF();
+  if(!D.canSwap){ toast('这个难度不能换股'); return; }
+  if(S.bankrupt){ toast('退市流程里不能换股'); return; }
+  const pool=stockPool();
+  const box=$('m4list'); box.innerHTML='';
+  pool.forEach((s,i)=>{
+    const d=document.createElement('div');
+    d.className='m4item'+(i===S.idx?' on':'');
+    d.innerHTML='<div class="t">'+s.name+'<em>'+s.board+' · ±'+s.limit+'%</em></div><div class="d">'+(s.desc||'')+'</div>';
+    d.onclick=()=>{
+      settlePosition();
+      loadStock(i,true);
+      $('modal4').classList.remove('show');
+      resumeGame();
+    };
+    box.appendChild(d);
+  });
+  if(!S.paused) pauseGame();
+  $('modal4').classList.add('show');
+}
+$('btnStock').onclick=openSwap;
+$('m4cancel').onclick=()=>{ $('modal4').classList.remove('show'); resumeGame(); };
 $('btnReset').onclick=()=>askNum('重启？输入 1 确定（资金回 1 万，全部清空）','1',v=>{
   if(String(v).trim()!=='1') return;
-  S.baseCapital=10000;
-  S.mine.cash=10000;
-  S.mine.lev=1;
-  S.tick=0;
-  [...$('levs').children].forEach(c=>c.classList.toggle('on',c.dataset.l==='1'));
-  loadStock(0,false);
+  resetGame(S.diff);
 });
 $('btnSpeed').onclick=()=>{
   const opts=[7500,5000,3000,1500];
@@ -794,11 +1547,6 @@ $('btnSpeed').onclick=()=>{
   restartTimer();
   $('btnSpeed').textContent=(TICK/1000)+' 秒/根';
 };
-let timer=null;
-function restartTimer(){
-  if(timer) clearInterval(timer);
-  timer=setInterval(step,TICK);
-}
 
 /* 概率面板折叠 */
 $('probHead').onclick=()=>{
@@ -810,11 +1558,21 @@ try{
   if(localStorage.getItem('fy_prob_collapsed')==='1') document.querySelector('.probbox').classList.add('collapsed');
 }catch(e){}
 
+/* 难度按钮 */
+document.querySelectorAll('.dwrap').forEach(el=>{
+  el.onclick=()=>{
+    setDiff(el.dataset.d);
+  };
+});
+
+/* 首次点击解锁音频 */
+document.addEventListener('click',()=>{ A(); },{once:true});
+
 /* ============ 启动 ============ */
 resizeCanvas();
-loadStock(0,false);
+document.body.className='diff-novice';
+resetGame('novice');
 paint();renderEvents();renderProb();draw();
-restartTimer();
 window.__S=S;
 </script>
 </body>
