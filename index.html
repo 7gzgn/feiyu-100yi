@@ -57,8 +57,8 @@ html.rot #stage{position:absolute;left:0;top:0;transform-origin:0 0}
 .nb-stat{display:flex;flex-direction:column;gap:3px;font-size:15px;color:#a9925a;margin-right:22px;line-height:1.25;text-shadow:0 1px 3px rgba(0,0,0,.9)}
 .nb-stat b{color:#f0e2b8;font-family:Consolas,monospace;font-size:16px;margin-left:4px}
 .nb-stat .row{white-space:nowrap}
-.nb-pos{display:flex;flex-direction:column;align-items:flex-end;gap:2px;margin-right:26px}
-.nb-pos .me{font-size:28px;font-weight:700;color:#d9c47f}
+.nb-pos{display:flex;flex-direction:column;align-items:flex-end;gap:2px;margin-right:26px;white-space:nowrap}
+.nb-pos .me{font-size:26px;font-weight:700;color:#d9c47f}
 .nb-pos .me em{font-style:normal;font-family:Consolas,monospace}
 .nb-pos .v{font-size:19px;color:#8b7439;font-family:Consolas,monospace}
 .nb-price{font-size:54px;font-weight:700;font-family:Consolas,monospace}
@@ -146,14 +146,22 @@ to{box-shadow:0 18px 56px rgba(0,0,0,.8), inset 0 0 80px rgba(224,32,32,.18), 0 
   display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ev-item .n{font-size:24px;font-weight:700;letter-spacing:1px;white-space:nowrap}
 .ev-item .d{font-size:15px;font-family:Consolas,monospace;color:#a28e52;white-space:nowrap}
+.ev-item .hint{flex:0 0 auto;font-size:12px;line-height:1;color:#c9a227;border:1px solid #6b531f;
+  border-radius:3px;padding:3px 7px;white-space:nowrap;letter-spacing:1px}
+.ev-item:hover{border-color:#c9a227;background:rgba(201,162,39,.07)}
+.ev-item:hover .hint{background:#c9a227;color:#1a1305;border-color:#e9d085}
+.mb-slot .hint{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:11px;line-height:1;color:#8b7439;border:1px solid #3d2f12;
+  border-radius:3px;padding:3px 6px;letter-spacing:.5px}
+.mb-slot:hover{border-color:#c9a227;background:rgba(201,162,39,.07)}
+.mb-slot:hover .hint{color:#c9a227;border-color:#6b531f}
 .ev-item.spec{border-color:#b3352b;box-shadow:0 0 14px rgba(224,32,32,.35), inset 0 0 24px rgba(224,32,32,.12)}
 .ev-item.spec .n{font-size:27px}
 .ev-empty{flex:1;display:flex;align-items:center;justify-content:center;color:#5c4f28;font-size:18px}
 
 .minorbox{flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:9px;min-height:0}
 .mb-slots{flex:1;display:flex;flex-direction:column;gap:7px;min-height:0;overflow:auto}
-.mb-slot{flex:0 0 auto;border:1px solid #3d2f12;background:rgba(255,255,255,.015);padding:5px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px}
-.mb-slot .nm{font-size:19px;font-weight:700}
+.mb-slot{position:relative;flex:0 0 auto;border:1px solid #3d2f12;background:rgba(255,255,255,.015);padding:5px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.mb-slot .nm{font-size:19px;font-weight:700;padding-right:66px}
 .mb-slot .fx{font-size:16px;color:#a28e52;font-family:Consolas,monospace}
 .mb-idle{flex:1;display:flex;align-items:center;justify-content:center;color:#5c4f28;font-size:18px}
 
@@ -244,19 +252,19 @@ body.diff-real .minorbox .good,body.diff-real .minorbox .bad{color:#dfe6ee!impor
   <div class="diffbar" id="diffbar">
     <div class="dwrap" data-d="novice">
       <div class="dbtn on">新手</div>
-      <div class="ddesc">现版本 · 大事件 1 / 小事件 4 · 概率可见 · 杠杆 1/2/5/10 · 可充钱可换股</div>
+      <div class="ddesc">大事件 2 / 小事件 4 · 概率可见 · 杠杆 1/2/5/10 · 可充钱可换股 · 无手续费</div>
     </div>
     <div class="dwrap" data-d="hard">
       <div class="dbtn">困难</div>
-      <div class="ddesc">大事件 3 / 小事件 10 · 概率隐藏 · 杠杆 1/2/5 · 上交 12 次 · 手续费 0.05% · 退市 0.4%</div>
+      <div class="ddesc">大事件 3 / 小事件 6 · 概率隐藏 · 杠杆 1/2/5 · 手续费 0.05% · 游玩费 12 次 · 会退市</div>
     </div>
     <div class="dwrap" data-d="hell">
       <div class="dbtn">地狱</div>
-      <div class="ddesc">一只【？？？】 · 大事件 5 / 小事件 15 · 杠杆 1/2 · 手续费 0.5% · 禁换股 · 退市风险磨底</div>
+      <div class="ddesc">一只【？？？】 · 大事件 4 / 小事件 8 · 杠杆 1/2 · 手续费 0.15% · 禁换股 · 游玩费 15 次</div>
     </div>
     <div class="dwrap" data-d="real">
       <div class="dbtn">真实</div>
-      <div class="ddesc">一只【？？？】 · 事件在场不限、各自到期消失、天数×2.2 · T+1 · 禁换股禁充钱 · 日息 · 上交 33 次</div>
+      <div class="ddesc">一只【？？？】 · 大事件 6 / 小事件 11 · T+1 · 禁换股禁充钱 · 日息 · 游玩费 33 次</div>
     </div>
   </div>
 
@@ -348,7 +356,7 @@ body.diff-real .minorbox .good,body.diff-real .minorbox .bad{color:#dfe6ee!impor
       </div>
       <div class="ctrl-row">
         <div class="cbtn warn" id="btnReset">重启</div>
-        <div class="cbtn" id="btnChargeInfo">上交 —</div>
+        <div class="cbtn" id="btnChargeInfo">游玩费 —</div>
       </div>
     </div>
   </div>
@@ -441,41 +449,45 @@ const RED='#ff4a41',GREEN='#22d16a',YEL='#ffd75e';
 const N_SHOW=44, LOT=100;
 let TICK=7500;
 
-/* ============ 难度 ============ */
+/* ============ 难度 ============
+   难度不靠"事件叠爆价格"，靠手续费 / 交费次数 / 杠杆 / T+1 / 利息 / 退市。
+   价格本身永远走正常分布（见 nextPct），哪一档都一样。 */
 const DIFFS={
-  novice:{label:'新手',bigMax:1,bigRate:0.10,smallRate:0.45,smallMax:4,
-    levs:[1,2,5,10],special:false,saw:false,charge:false,canMoney:true,canSwap:true,pool:'base',fee:0},
-  hard:{label:'困难',bigMax:3,bigRate:0.08,smallRate:0.52,smallMax:10,
-    levs:[1,2,5],special:true,saw:true,charge:true,canMoney:false,canSwap:true,pool:'extra',fee:0.0005,
-    chargeStart:2000,chargeMul:1.8,chargeEvery:50,chances:3,chargeMax:12},
-  hell:{label:'地狱',bigMax:5,bigRate:0.20,smallRate:0.85,smallMax:15,
-    levs:[1,2],special:true,saw:true,charge:true,canMoney:false,canSwap:false,pool:'hell',fee:0.005,
-    chargeStart:2000,chargeMul:1.8,chargeEvery:50,chances:3,chargeMax:12,daysMul:1.5,stMode:true},
-  real:{label:'真实',bigMax:999,bigRate:0.30,smallRate:0.95,smallMax:999,
-    levs:[1,2],special:true,saw:true,charge:true,canMoney:false,canSwap:false,pool:'hell',fee:0.005,
-    chargeStart:2000,chargeMul:1.8,chargeEvery:50,chances:3,chargeMax:33,daysMul:2.2,stMode:true,
-    tPlus1:true,interest:0.0005,noMiracle:true}
+  novice:{label:'新手',bigMax:2,bigRate:0.12,smallRate:0.40,smallMax:4,
+    levs:[1,2,5,10],special:false,charge:false,canMoney:true,canSwap:true,pool:'base',fee:0,
+    showProb:true},
+  hard:{label:'困难',bigMax:3,bigRate:0.14,smallRate:0.50,smallMax:6,
+    levs:[1,2,5],special:true,charge:true,canMoney:false,canSwap:true,pool:'extra',fee:0.0005,
+    chargeStart:2000,chargeMul:1.75,chargeEvery:60,chances:3,chargeMax:12,daysMul:1.1},
+  hell:{label:'地狱',bigMax:4,bigRate:0.16,smallRate:0.60,smallMax:8,
+    levs:[1,2],special:true,charge:true,canMoney:false,canSwap:false,pool:'hell',fee:0.0015,
+    chargeStart:2000,chargeMul:1.80,chargeEvery:55,chances:3,chargeMax:15,daysMul:1.25,stMode:true},
+  real:{label:'真实',bigMax:6,bigRate:0.18,smallRate:0.68,smallMax:11,
+    levs:[1,2],special:true,charge:true,canMoney:false,canSwap:false,pool:'hell',fee:0.0025,
+    chargeStart:2000,chargeMul:1.85,chargeEvery:50,chances:3,chargeMax:33,daysMul:1.45,stMode:true,
+    tPlus1:true,interest:0.0006,noMiracle:true}
 };
 const CHAIN=['novice','hard','hell','real'];
 function nextDiff(k){ const i=CHAIN.indexOf(k); return CHAIN[Math.min(i+1,CHAIN.length-1)]; }
 function DIFF(){ return DIFFS[S.diff]; }
 
-/* ============ 股票池 ============ */
+/* ============ 股票池 ============
+   vol = 日波动率基准（%）。K 线形状全由它决定，事件只微调方向。 */
 const STOCKS = [
-  {name:'肥鱼科技',board:'主板',limit:10,base:5,desc:'光模块与算力板卡，吃 AI 订单的周期股，涨得慢跌得也慢'},
-  {name:'肥鱼物流',board:'主板',limit:10,base:4,desc:'干线运输与仓储，盈利稳定但没有想象空间，典型的防御票'},
-  {name:'肥鱼能源',board:'主板',limit:10,base:5,desc:'火电与新能源装机各占一半，看煤价和电价吃饭'},
-  {name:'肥鱼半导',board:'创业板',limit:20,base:9,desc:'晶圆代工，产能一开就是钱，产能一停就是雷'},
-  {name:'肥鱼软件',board:'创业板',limit:20,base:10,desc:'政企软件服务商，回款慢、概念多，最容易讲重组故事'},
-  {name:'肥鱼医疗',board:'创业板',limit:20,base:8,desc:'器械与耗材，集采一刀下来能腰斩，创新管线落地能翻倍'},
-  {name:'肥鱼材料',board:'科创板',limit:20,base:11,desc:'半导体材料，国产替代的旗手，波动全看政策和订单'},
-  {name:'肥鱼芯片',board:'科创板',limit:20,base:10,desc:'自研 GPU，研发烧钱无底洞，一次流片成功就鸡犬升天'},
-  {name:'肥鱼电子',board:'北交所',limit:30,base:13,desc:'小市值消费电子，流动性差，一根大单就能拉出涨停'},
-  {name:'肥鱼制药',board:'北交所',limit:30,base:12,desc:'仿制药加一条创新药管线，临床数据决定生死'}
+  {name:'肥鱼科技',board:'主板',limit:10,base:5,vol:1.25,desc:'光模块与算力板卡，吃 AI 订单的周期股，涨得慢跌得也慢'},
+  {name:'肥鱼物流',board:'主板',limit:10,base:4,vol:1.05,desc:'干线运输与仓储，盈利稳定但没有想象空间，典型的防御票'},
+  {name:'肥鱼能源',board:'主板',limit:10,base:5,vol:1.15,desc:'火电与新能源装机各占一半，看煤价和电价吃饭'},
+  {name:'肥鱼半导',board:'创业板',limit:20,base:9,vol:1.75,desc:'晶圆代工，产能一开就是钱，产能一停就是雷'},
+  {name:'肥鱼软件',board:'创业板',limit:20,base:10,vol:1.70,desc:'政企软件服务商，回款慢、概念多，最容易讲重组故事'},
+  {name:'肥鱼医疗',board:'创业板',limit:20,base:8,vol:1.60,desc:'器械与耗材，集采一刀下来能腰斩，创新管线落地能翻倍'},
+  {name:'肥鱼材料',board:'科创板',limit:20,base:11,vol:1.75,desc:'半导体材料，国产替代的旗手，波动全看政策和订单'},
+  {name:'肥鱼芯片',board:'科创板',limit:20,base:10,vol:1.95,desc:'自研 GPU，研发烧钱无底洞，一次流片成功就鸡犬升天'},
+  {name:'肥鱼电子',board:'北交所',limit:30,base:13,vol:2.30,desc:'小市值消费电子，流动性差，一根大单就能拉出涨停'},
+  {name:'肥鱼制药',board:'北交所',limit:30,base:12,vol:2.10,desc:'仿制药加一条创新药管线，临床数据决定生死'}
 ];
 /* 地狱 / 真实：只剩一只，名字是【？？？】 */
 const MYST = {
-  name:'【？？？】',board:'',limit:10,base:5,
+  name:'【？？？】',board:'',limit:10,base:5,vol:1.55,
   desc:'不对外的票。名字被抹掉，涨跌被按在 ±10% 里，事件一天一个，谁也不告诉你是谁'
 };
 function stockPool(){
@@ -492,104 +504,156 @@ const EV = {
     {t:'问询函',k:'bad',m:'bias',v:0.28,d:[4,8]},
     {t:'限售解禁',k:'bad',m:'bias',v:0.33,d:[5,9]},
     {t:'行业政策利好',k:'good',m:'bias',v:0.72,d:[5,10]},
-    {t:'大额回购',k:'good',m:'bias',v:0.74,d:[4,8]}
+    {t:'大额回购',k:'good',m:'bias',v:0.74,d:[4,8]},
+    {t:'央企整合预期',k:'good',m:'bias',v:0.73,d:[6,11]},
+    {t:'董监高集体增持',k:'good',m:'bias',v:0.75,d:[5,9]},
+    {t:'核心客户流失',k:'bad',m:'bias',v:0.26,d:[5,9]},
+    {t:'计提减值',k:'bad',m:'bias',v:0.29,d:[4,8]}
   ],
   '创业板':[
-    {t:'游资入场',k:'good',m:'pin',v:1,d:[2,4]},
-    {t:'重大合同',k:'good',m:'pin',v:1,d:[1,3]},
-    {t:'并购重组',k:'good',m:'bias',v:0.84,d:[6,10]},
-    {t:'业绩暴雷',k:'bad',m:'pin',v:-1,d:[1,3]},
+    {t:'游资入场',k:'good',m:'bias',v:0.72,d:[2,4]},
+    {t:'重大合同',k:'good',m:'bias',v:0.78,d:[3,6]},
+    {t:'并购重组',k:'good',m:'bias',v:0.70,d:[6,10]},
+    {t:'业绩暴雷',k:'bad',m:'bias',v:0.26,d:[3,6]},
     {t:'商誉减值',k:'bad',m:'bias',v:0.22,d:[5,9]},
     {t:'监管处罚',k:'bad',m:'bias',v:0.25,d:[5,9]},
     {t:'大股东质押爆仓',k:'bad',m:'range',v:2.0,d:[4,8]},
-    {t:'定增落地',k:'good',m:'bias',v:0.70,d:[5,9]}
+    {t:'定增落地',k:'good',m:'bias',v:0.70,d:[5,9]},
+    {t:'实控人被留置',k:'bad',m:'bias',v:0.20,d:[6,10]},
+    {t:'新产品放量',k:'good',m:'bias',v:0.74,d:[5,9]},
+    {t:'海外认证通过',k:'good',m:'bias',v:0.72,d:[4,8]},
+    {t:'应收账款暴增',k:'bad',m:'bias',v:0.30,d:[5,9]}
   ],
   '科创板':[
-    {t:'研发突破',k:'good',m:'bias',v:0.82,d:[5,10]},
-    {t:'专利授权',k:'good',m:'range',v:1.8,d:[5,9]},
-    {t:'政策扶持',k:'good',m:'bias',v:0.76,d:[5,9]},
-    {t:'国产替代',k:'good',m:'bias',v:0.78,d:[5,10]},
+    {t:'研发突破',k:'good',m:'bias',v:0.76,d:[5,10]},
+    {t:'专利授权',k:'good',m:'bias',v:0.70,d:[5,9]},
+    {t:'政策扶持',k:'good',m:'bias',v:0.72,d:[5,9]},
+    {t:'国产替代',k:'good',m:'bias',v:0.74,d:[5,10]},
     {t:'研发失败',k:'bad',m:'bias',v:0.20,d:[5,9]},
     {t:'退市警示',k:'bad',m:'bias',v:0.16,d:[4,8]},
     {t:'行业会议',k:'neutral',m:'range',v:1.5,d:[4,8]},
-    {t:'大客户流失',k:'bad',m:'bias',v:0.24,d:[5,9]}
+    {t:'大客户流失',k:'bad',m:'bias',v:0.24,d:[5,9]},
+    {t:'核心技术团队出走',k:'bad',m:'bias',v:0.22,d:[5,9]},
+    {t:'国家大基金入股',k:'good',m:'bias',v:0.78,d:[6,11]},
+    {t:'流片成功',k:'good',m:'bias',v:0.76,d:[4,8]},
+    {t:'产能爬坡不及预期',k:'bad',m:'bias',v:0.28,d:[5,9]}
   ],
   '北交所':[
     {t:'做市商进场',k:'good',m:'range',v:2.0,d:[5,10]},
-    {t:'转板预期',k:'good',m:'bias',v:0.80,d:[6,12]},
-    {t:'重组预期',k:'good',m:'pin',v:1,d:[1,3]},
+    {t:'转板预期',k:'good',m:'bias',v:0.76,d:[6,12]},
+    {t:'重组预期',k:'good',m:'bias',v:0.72,d:[3,6]},
     {t:'纳入指数',k:'good',m:'bias',v:0.74,d:[5,9]},
     {t:'流动性枯竭',k:'bad',m:'range',v:1.9,d:[5,9]},
     {t:'股东减持',k:'bad',m:'bias',v:0.27,d:[4,8]},
     {t:'成交清淡',k:'neutral',m:'range',v:1.4,d:[4,7]},
-    {t:'业绩预减',k:'bad',m:'bias',v:0.26,d:[5,10]}
+    {t:'业绩预减',k:'bad',m:'bias',v:0.26,d:[5,10]},
+    {t:'机构集中建仓',k:'good',m:'bias',v:0.75,d:[4,8]},
+    {t:'挂牌企业增多',k:'neutral',m:'range',v:1.3,d:[4,7]},
+    {t:'拟转板受理',k:'good',m:'bias',v:0.74,d:[5,9]},
+    {t:'诉讼缠身',k:'bad',m:'bias',v:0.25,d:[5,9]}
   ]
 };
 const EV_EXTRA = {
   '主板':[
-    {t:'资产重组',k:'good',m:'bias',v:0.80,d:[5,9]},
-    {t:'高送转',k:'good',m:'range',v:1.6,d:[4,7]},
+    {t:'资产重组',k:'good',m:'bias',v:0.78,d:[5,9]},
+    {t:'高送转',k:'good',m:'bias',v:0.70,d:[4,7]},
     {t:'大额减持',k:'bad',m:'bias',v:0.30,d:[5,9]},
     {t:'业绩变脸',k:'bad',m:'bias',v:0.24,d:[5,9]},
     {t:'中标大单',k:'good',m:'bias',v:0.72,d:[4,8]},
-    {t:'环保处罚',k:'bad',m:'bias',v:0.32,d:[4,7]}
+    {t:'环保处罚',k:'bad',m:'bias',v:0.32,d:[4,7]},
+    {t:'龙虎榜异动',k:'good',m:'bias',v:0.74,d:[3,6]},
+    {t:'股东大会议案通过',k:'neutral',m:'bias',v:0.5,d:[3,5]},
+    {t:'外资大幅调仓',k:'bad',m:'bias',v:0.30,d:[4,7]},
+    {t:'国企改革预期',k:'good',m:'bias',v:0.76,d:[6,10]}
   ],
   '创业板':[
-    {t:'海外订单',k:'good',m:'bias',v:0.78,d:[5,9]},
-    {t:'股权激励',k:'good',m:'range',v:1.5,d:[4,8]},
-    {t:'实控人变更',k:'neutral',m:'range',v:2.2,d:[5,10]},
-    {t:'商誉暴雷',k:'bad',m:'pin',v:-1,d:[2,4]},
+    {t:'海外订单',k:'good',m:'bias',v:0.76,d:[5,9]},
+    {t:'股权激励',k:'good',m:'bias',v:0.68,d:[4,8]},
+    {t:'实控人变更',k:'neutral',m:'bias',v:0.5,d:[5,10]},
+    {t:'商誉暴雷',k:'bad',m:'bias',v:0.22,d:[3,6]},
     {t:'定增终止',k:'bad',m:'bias',v:0.28,d:[4,8]},
-    {t:'技术授权',k:'good',m:'bias',v:0.70,d:[5,9]}
+    {t:'技术授权',k:'good',m:'bias',v:0.70,d:[5,9]},
+    {t:'停牌核查',k:'neutral',m:'bias',v:0.5,d:[2,4]},
+    {t:'业绩承诺未达标',k:'bad',m:'bias',v:0.26,d:[5,9]},
+    {t:'引入战略投资者',k:'good',m:'bias',v:0.75,d:[5,9]},
+    {t:'产品降价促销',k:'bad',m:'bias',v:0.33,d:[4,8]}
   ],
   '科创板':[
-    {t:'首发订单',k:'good',m:'bias',v:0.80,d:[5,10]},
-    {t:'科创基金建仓',k:'good',m:'range',v:1.8,d:[5,9]},
+    {t:'首发订单',k:'good',m:'bias',v:0.76,d:[5,10]},
+    {t:'科创基金建仓',k:'good',m:'bias',v:0.73,d:[5,9]},
     {t:'核心人员流失',k:'bad',m:'bias',v:0.22,d:[5,9]},
     {t:'补贴退坡',k:'bad',m:'bias',v:0.26,d:[5,9]},
-    {t:'国际认证',k:'good',m:'bias',v:0.76,d:[4,8]},
-    {t:'临床试验失败',k:'bad',m:'pin',v:-1,d:[1,3]}
+    {t:'国际认证',k:'good',m:'bias',v:0.74,d:[4,8]},
+    {t:'临床试验失败',k:'bad',m:'bias',v:0.20,d:[3,6]},
+    {t:'产学研合作',k:'good',m:'bias',v:0.70,d:[5,9]},
+    {t:'供应商断供',k:'bad',m:'bias',v:0.24,d:[4,8]},
+    {t:'二期产能投产',k:'good',m:'bias',v:0.74,d:[5,9]},
+    {t:'审计意见非标',k:'bad',m:'bias',v:0.18,d:[5,9]}
   ],
   '北交所':[
-    {t:'机构集中调研',k:'good',m:'bias',v:0.76,d:[4,8]},
-    {t:'转板受理',k:'good',m:'pin',v:1,d:[1,3]},
-    {t:'做市商退出',k:'bad',m:'range',v:1.8,d:[4,8]},
+    {t:'机构集中调研',k:'good',m:'bias',v:0.74,d:[4,8]},
+    {t:'转板受理',k:'good',m:'bias',v:0.76,d:[3,6]},
+    {t:'做市商退出',k:'bad',m:'bias',v:0.28,d:[4,8]},
     {t:'股东质押',k:'bad',m:'bias',v:0.30,d:[5,9]},
-    {t:'业绩快报超预期',k:'good',m:'bias',v:0.78,d:[5,9]},
-    {t:'流动性警告',k:'bad',m:'bias',v:0.25,d:[4,8]}
+    {t:'业绩快报超预期',k:'good',m:'bias',v:0.76,d:[5,9]},
+    {t:'流动性警告',k:'bad',m:'bias',v:0.25,d:[4,8]},
+    {t:'被纳入做市标的',k:'good',m:'bias',v:0.73,d:[4,8]},
+    {t:'股东户数骤降',k:'good',m:'bias',v:0.70,d:[4,7]},
+    {t:'大宗折价成交',k:'bad',m:'bias',v:0.32,d:[3,6]},
+    {t:'回购注销',k:'good',m:'bias',v:0.72,d:[4,8]}
   ]
 };
 const EV_HELL = [
   {t:'董事长失联',k:'bad',m:'bias',v:0.18,d:[5,9]},
-  {t:'财务造假立案',k:'bad',m:'pin',v:-1,d:[2,4]},
-  {t:'神秘资金扫货',k:'good',m:'pin',v:1,d:[2,4]},
+  {t:'财务造假立案',k:'bad',m:'bias',v:0.22,d:[3,6]},
+  {t:'神秘资金扫货',k:'good',m:'bias',v:0.76,d:[3,6]},
   {t:'做空报告',k:'bad',m:'bias',v:0.20,d:[5,9]},
-  {t:'央行降准',k:'good',m:'bias',v:0.82,d:[6,12]},
-  {t:'监管立案',k:'bad',m:'bias',v:0.16,d:[5,10]},
-  {t:'国家队入场',k:'good',m:'bias',v:0.80,d:[5,10]},
-  {t:'退市风险警示',k:'bad',m:'bias',v:0.14,d:[4,8]}
+  {t:'央行降准',k:'good',m:'bias',v:0.74,d:[6,12]},
+  {t:'监管立案',k:'bad',m:'bias',v:0.18,d:[5,10]},
+  {t:'国家队入场',k:'good',m:'bias',v:0.74,d:[5,10]},
+  {t:'退市风险警示',k:'bad',m:'bias',v:0.16,d:[4,8]},
+  {t:'强制平仓潮',k:'bad',m:'bias',v:0.21,d:[3,6]},
+  {t:'庄家收网',k:'bad',m:'bias',v:0.19,d:[4,7]},
+  {t:'神秘资金托底',k:'good',m:'bias',v:0.78,d:[3,6]},
+  {t:'大股东违规占用',k:'bad',m:'bias',v:0.20,d:[5,8]}
 ];
 const SMALL=[
-  {t:'获授专利',k:'good',v:0.64},
-  {t:'研报上调',k:'good',v:0.66},
-  {t:'行业景气',k:'good',v:0.62},
+  {t:'获授专利',k:'good',v:0.62},
+  {t:'研报上调',k:'good',v:0.63},
+  {t:'行业景气',k:'good',v:0.61},
   {t:'大单签订',k:'good',v:0.63},
-  {t:'例行公告',k:'neutral',v:0.52},
-  {t:'问询回复',k:'neutral',v:0.48},
-  {t:'减持传闻',k:'bad',v:0.38},
-  {t:'成交异常',k:'bad',v:0.36},
+  {t:'例行公告',k:'neutral',v:0.51},
+  {t:'问询回复',k:'neutral',v:0.49},
+  {t:'减持传闻',k:'bad',v:0.39},
+  {t:'成交异常',k:'bad',v:0.38},
   {t:'高管变动',k:'neutral',v:0.50},
   {t:'成本上升',k:'bad',v:0.40},
-  {t:'机构上调',k:'good',v:0.65},
+  {t:'机构上调',k:'good',v:0.62},
   {t:'中标公告',k:'good',v:0.63},
-  {t:'分红预案',k:'good',v:0.61},
-  {t:'业绩快报',k:'good',v:0.67},
-  {t:'调研纪要',k:'neutral',v:0.53},
-  {t:'股权质押',k:'bad',v:0.37},
+  {t:'分红预案',k:'good',v:0.60},
+  {t:'业绩快报',k:'good',v:0.64},
+  {t:'调研纪要',k:'neutral',v:0.52},
+  {t:'股权质押',k:'bad',v:0.38},
   {t:'诉讼进展',k:'bad',v:0.39},
-  {t:'限售解禁',k:'bad',v:0.35},
-  {t:'媒体质疑',k:'bad',v:0.34},
-  {t:'订单延期',k:'bad',v:0.38}
+  {t:'限售解禁',k:'bad',v:0.37},
+  {t:'媒体质疑',k:'bad',v:0.36},
+  {t:'订单延期',k:'bad',v:0.39},
+  {t:'高管增持',k:'good',v:0.61},
+  {t:'机构席位买入',k:'good',v:0.63},
+  {t:'大股东补充质押',k:'bad',v:0.38},
+  {t:'产品提价',k:'good',v:0.64},
+  {t:'客户集中度下降',k:'bad',v:0.40},
+  {t:'研发投入加码',k:'neutral',v:0.52},
+  {t:'现金流改善',k:'good',v:0.61},
+  {t:'应收账款高企',k:'bad',v:0.38},
+  {t:'获得政府补助',k:'good',v:0.62},
+  {t:'产能利用率下滑',k:'bad',v:0.37},
+  {t:'专利纠纷',k:'bad',v:0.39},
+  {t:'新品发布',k:'good',v:0.61},
+  {t:'海外工厂投产',k:'good',v:0.63},
+  {t:'人民币汇率波动',k:'neutral',v:0.50},
+  {t:'限电限产',k:'bad',v:0.36},
+  {t:'行业库存去化',k:'good',v:0.61}
 ];
 
 const S = {
@@ -598,7 +662,8 @@ const S = {
   mine:{cash:10000, pos:null, lev:1, wantHands:1},
   upP:0.5, drift:0, baseCapital:10000,
   diff:'novice', playMode:'auto', paused:false, spec:null,
-  charge:{n:0, owed:0, chances:3}
+  charge:{n:0, owed:0, chances:3},
+  regime:1, anchor:0, volNow:1.5, jump:null, lastJx:null
 };
 
 /* ============ 音效 ============ */
@@ -636,7 +701,8 @@ function sfxLose(){
   tone(110,0.30,0.55,'sine',0.16);
 }
 
-/* 地狱 / 真实专属：一只票的定制事件库，五花八门、带联动 */
+/* 地狱 / 真实专属：一只票的定制事件库，五花八门、带联动。
+   jx:1/-1 = 异动（当天直接跳一根接近涨/跌停），全场最多一个、70 根内只来一次。 */
 const MYST_EVENTS=[
   {t:'业绩预增',k:'good',d:[4,8],link:'机构调研'},
   {t:'扭亏为盈',k:'good',d:[5,9],link:'摘帽预期'},
@@ -658,6 +724,11 @@ const MYST_EVENTS=[
   {t:'股权激励',k:'good',d:[4,7]},
   {t:'摘帽预期',k:'good',d:[4,8]},
   {t:'AI 概念加持',k:'good',d:[3,7],link:'游资锁仓'},
+  {t:'国资入股',k:'good',d:[5,9],link:'机构调研'},
+  {t:'引入战略投资者',k:'good',d:[5,9]},
+  {t:'被纳入MSCI',k:'good',d:[4,8]},
+  {t:'子公司分拆上市预期',k:'good',d:[5,10]},
+  {t:'中标海外项目',k:'good',d:[5,9]},
   {t:'业绩暴雷',k:'bad',d:[5,9],link:'商誉减值'},
   {t:'商誉减值',k:'bad',d:[4,8]},
   {t:'大股东减持',k:'bad',d:[4,7],link:'质押爆仓'},
@@ -676,17 +747,39 @@ const MYST_EVENTS=[
   {t:'股权冻结',k:'bad',d:[4,8]},
   {t:'退市风险提示',k:'bad',d:[4,8]},
   {t:'做空报告',k:'bad',d:[5,9],link:'财务造假传闻'},
+  {t:'董监高减持',k:'bad',d:[3,6]},
+  {t:'评级下调',k:'bad',d:[5,9]},
+  {t:'子公司失控',k:'bad',d:[4,8]},
   {t:'停牌复牌',k:'neutral',d:[2,4]},
   {t:'股东会',k:'neutral',d:[3,5]},
   {t:'行业会议',k:'neutral',d:[3,5]},
   {t:'问询回复',k:'neutral',d:[3,5]},
-  {t:'一字涨停',k:'good',d:[1,3],pin:1},
-  {t:'连续涨停',k:'good',d:[2,4],pin:1},
-  {t:'地天板',k:'good',d:[1,2],pin:1},
-  {t:'闪崩跌停',k:'bad',d:[1,2],pin:-1},
-  {t:'连续跌停',k:'bad',d:[2,4],pin:-1},
-  {t:'天地板',k:'bad',d:[1,2],pin:-1}
+  {t:'实控人变更',k:'neutral',d:[4,7],link:'借壳传闻'},
+  {t:'债务展期',k:'neutral',d:[3,6]},
+  {t:'一字涨停',k:'good',d:[1,2],jx:1},
+  {t:'一字跌停',k:'bad',d:[1,2],jx:-1},
+  {t:'地天板',k:'good',d:[1,2],jx:1},
+  {t:'天地板',k:'bad',d:[1,2],jx:-1}
 ];
+
+/* 每档自己的特殊事件：低频、高影响，但只给方向，不封板 */
+const SPECIAL={
+  hard:[
+    {t:'龙虎榜异动',k:'good',d:[3,6]},
+    {t:'股东大会议案',k:'neutral',d:[3,5]},
+    {t:'外资大幅调仓',k:'bad',d:[4,7]}
+  ],
+  hell:[
+    {t:'强制平仓潮',k:'bad',d:[3,6]},
+    {t:'庄家收网',k:'bad',d:[4,7]},
+    {t:'神秘资金托底',k:'good',d:[3,6]}
+  ],
+  real:[
+    {t:'监管窗口指导',k:'bad',d:[3,6]},
+    {t:'大股东违规占用',k:'bad',d:[5,8]},
+    {t:'信息真空期',k:'neutral',d:[4,8]}
+  ]
+};
 
 /* ============ 事件池 ============ */
 function bigPool(){
@@ -708,7 +801,9 @@ function loadStock(i, keepMoney){
   const D=DIFF();
   S.stock=st;
   S.price=+(rnd(8,60)).toFixed(2);
+  S.anchor=S.price;
   S.bars=[];S.bigs=[];S.minor=[];S.lastPct=0;S.bankrupt=null;S.upP=0.5;S.drift=0;S.spec=null;
+  S.regime=1;S.volNow=st.vol;S.jump=null;S.lastJx=null;
   if(S.mine.pos) S.mine.cash += S.mine.pos.margin;
   S.mine.pos=null;
   if(!keepMoney) S.mine.cash=10000;
@@ -718,17 +813,65 @@ function loadStock(i, keepMoney){
   $('stBoard').textContent=st.board?(st.board+'（±'+st.limit+'%）'):('±'+st.limit+'%');
   $('stDelist').style.display='none';
   document.querySelector('.eventbox').classList.remove('bankrupt');
+  // 预填的历史 K 线：同一条价格引擎跑出来的，不是均匀随机
   for(let n=0;n<N_SHOW+16;n++){
-    const up=Math.random()<0.5;
-    const p=(up?1:-1)*Math.random()*st.base;
-    const o=S.price,c=+(o*(1+p/100)).toFixed(2);
-    S.bars.push({o,c,up:c>=o,pct:p});
+    S.regime=clamp(0.86*S.regime+0.14+gauss()*0.20,0.5,2.4);
+    S.volNow=st.vol*S.regime;
+    const pct=clamp(gauss()*S.volNow*0.85,-st.limit,st.limit);
+    const o=S.price,c=+(o*(1+pct/100)).toFixed(2);
+    S.bars.push({o,c,up:c>=o,pct});
     S.price=c;
   }
+  S.anchor=S.price;
   S.lastPct=S.bars[S.bars.length-1].pct;
+  S.regime=1;S.volNow=st.vol;
   renderLevs();
   setHands(S.mine.wantHands);
   paint();draw();renderEvents();renderProb();updateChargeBtn();
+}
+
+/* ============ 价格引擎 ============
+   一根 K 线 = 正态随机 × 当日波动 × 事件漂移 + 均值回归。
+   事件只改"往哪边偏一点"，不改"能跳多高" —— 所以事件再多也不会天天涨停。 */
+let gaussSpare=null;
+function gauss(){
+  if(gaussSpare!==null){ const v=gaussSpare; gaussSpare=null; return v; }
+  let u=0,v=0;
+  while(u===0) u=Math.random();
+  while(v===0) v=Math.random();
+  const m=Math.sqrt(-2*Math.log(u));
+  gaussSpare=m*Math.sin(2*Math.PI*v);
+  return m*Math.cos(2*Math.PI*v);
+}
+function eventDrift(){
+  let d=0;
+  S.bigs.forEach(b=>{
+    if(b.jx) d+=b.jx*0.65;
+    else if(b.k==='good') d+=0.20;
+    else if(b.k==='bad') d-=0.20;
+  });
+  S.minor.forEach(m=>{ d+=(m.v-0.5)*0.30; });
+  // 均值回归：价格离起点越远，拉回来的力越大（所以不会一路飞到天上或归零）
+  d-=clamp((S.price/(S.anchor||S.price)-1)*1.8,-3.2,3.2);
+  // 自己的仓位对盘口的冲击，很小
+  const p=S.mine.pos;
+  if(p){
+    const val=p.hands*LOT*S.price;
+    d+=p.dir*clamp(val/25000000,0,0.012);
+  }
+  return d;
+}
+function nextPct(){
+  const st=S.stock;
+  const nEv=S.bigs.length+S.minor.length*0.5;
+  let vol=S.volNow*(1+Math.min(0.40,nEv*0.03));
+  // 肥尾：4% 的日子波动被放大 —— 真实盘口本来就有这种日子
+  if(Math.random()<0.04) vol*=rnd(2,4.5);
+  return clamp(gauss()*vol+eventDrift(),-st.limit,st.limit);
+}
+function upBias(){
+  const vol=Math.max(0.35,S.volNow||S.stock.vol);
+  return clamp(0.5+eventDrift()/(vol*2.8),0.06,0.94);
 }
 
 /* ============ 主循环 ============ */
@@ -745,64 +888,22 @@ function step(){
   tickDown();
 
   if(D.stMode){
-    if(Math.random()<stChance()){ startBankrupt(); return; }   // stMode 下 startBankrupt 走退市风险
-  } else if(Math.random()<0.004){ startBankrupt(); return; }
+    if(Math.random()<stChance()){ startBankrupt(); return; }
+  }else if(Math.random()<0.0035){ startBankrupt(); return; }
 
-  const st=S.stock;
-  // 大事件按红绿计数：每红 +25%，每绿 -25%，三同向直接封板
-  let red=0,green=0,pin=0;
-  S.bigs.forEach(b=>{
-    if(b.m==='pin') pin=b.v;
-    else if(b.k==='good') red++;
-    else if(b.k==='bad') green++;
-  });
-  // 事件越多波动越大
-  let range=st.base*(1+0.22*S.bigs.length+0.10*S.minor.length);
-  range=Math.min(range, st.base*3.2);
-
-  if(!pin){
-    if(red>=3) pin=1;
-    else if(green>=3) pin=-1;
-  }
-  let upP=0.5;
-  if(!pin){
-    upP=0.5+0.25*(red-green);
-    let b2=0;
-    S.minor.forEach(m=>{ b2+=(m.v-0.5); });
-    upP=clamp(upP+b2,0.05,0.95);
-  }
-
-  let impact=0;
-  const p=S.mine.pos;
-  if(p){
-    const val=p.hands*LOT*S.price;
-    const push=clamp(val/1200000,0,0.06);
-    impact=p.dir*push;
-    if(!pin) upP=clamp(upP+impact*2,0.05,0.95);
-  }
-
-  S.upP=pin?(pin>0?1:0):upP;
+  // 波动聚集：安静一段、乱一段（真实盘口就是这样）
+  S.regime=clamp(0.86*S.regime+0.14+gauss()*0.20,0.5,2.4);
+  S.volNow=S.stock.vol*S.regime;
+  S.upP=upBias();
 
   let pct;
-  if(pin) pct=pin*st.limit;
-  else {
-    pct=(Math.random()<S.upP?1:-1)*Math.random()*range;
-    pct+=impact*100*0.5;
-    pct=clamp(pct,-st.limit,st.limit);
-    // 地铁难度：前一根大涨后一根大跌的锯齿
-    if(DIFF().saw && S.bars.length){
-      const prev=S.bars[S.bars.length-1].pct;
-      if(Math.abs(prev)>2.5 && Math.random()<0.55){
-        pct=clamp(-Math.sign(prev)*Math.abs(prev)*rnd(0.85,1.25),-st.limit,st.limit);
-      }
-    }
-  }
-
+  if(S.jump!=null){ pct=S.jump; S.jump=null; }
+  else pct=nextPct();
   pushBar(pct);
+
   // 真实档：持仓按天收利息
-  if(DIFF().interest && S.mine.pos){
-    const it=S.mine.pos.hands*LOT*S.price*DIFF().interest;
-    S.mine.cash-=it;
+  if(D.interest && S.mine.pos){
+    S.mine.cash-=S.mine.pos.hands*LOT*S.price*D.interest;
   }
   checkLiquidation();
   paint();draw();renderEvents();renderProb();
@@ -826,52 +927,53 @@ function fireBig(){
   if(Math.random()>=D.bigRate) return;
   const pool=bigPool();
   const e=pool[rndi(0,pool.length-1)];
+  if(!e) return;
   if(S.bigs.some(b=>b.t===e.t)) return;
-  if(e.pin && S.bigs.some(b=>b.m==='pin' && b.v!==e.pin)) return;   // 不叠反向封板
   const mul=D.daysMul||1;
   const d=Math.max(2,Math.round(rndi(e.d[0],e.d[1])*mul));
-  if(e.pin){
-    S.bigs.push({t:e.t,k:e.k,m:'pin',v:e.pin,left:d,days:d,special:true});
-  }else{
-    S.bigs.push({t:e.t,k:e.k,m:'bias',v:e.k==='good'?0.75:e.k==='bad'?0.25:0.5,left:d,days:d});
+
+  // 异动：当天直接跳一根涨/跌停。全场最多一个，70 根内只来一次。
+  if(e.jx){
+    if(S.bigs.some(b=>b.jx)) return;
+    if(S.lastJx!=null && S.tick-S.lastJx<70) return;
+    S.lastJx=S.tick;
+    const dd=Math.max(1,Math.min(3,Math.round(d*0.6)));
+    S.bigs.push({t:e.t,k:e.k,jx:e.jx,left:dd,days:dd});
+    S.jump=e.jx*S.stock.limit;
+    toast('异动：'+e.t);
+    renderEvents();
+    return;
   }
+
+  S.bigs.push({t:e.t,k:e.k,m:'bias',v:e.k==='good'?0.75:e.k==='bad'?0.25:0.5,left:d,days:d});
   // 联动：带出一条后续事件
   if(e.link && Math.random()<0.45){
     const l=pool.find(x=>x.t===e.link);
-    if(l && !S.bigs.some(b=>b.t===l.t)){
+    if(l && !l.jx && !S.bigs.some(b=>b.t===l.t)){
       const dl=Math.max(2,Math.round(rndi(l.d[0],l.d[1])*mul));
-      if(l.pin) S.bigs.push({t:l.t,k:l.k,m:'pin',v:l.pin,left:dl,days:dl,special:true,linked:true});
-      else S.bigs.push({t:l.t,k:l.k,m:'bias',v:l.k==='good'?0.75:l.k==='bad'?0.25:0.5,left:dl,days:dl,linked:true});
+      S.bigs.push({t:l.t,k:l.k,m:'bias',v:l.k==='good'?0.75:l.k==='bad'?0.25:0.5,left:dl,days:dl,linked:true});
     }
   }
   renderEvents();
 }
-/* 第二个大事件：追红追绿的人吃反向杀招 */
+/* 每档自己的特殊事件：低频、独立于普通事件限额 */
 function maybeSpecialBig(){
   const D=DIFF();
-  if(S.diff==='hell'||S.diff==='real') return false;   // 这两档用退市风险/摘帽 + 事件池里的涨跌停
   if(!D.special) return false;
-  if(S.bankrupt) return false;
+  if(S.bankrupt||S.spec) return false;
   if(S.bigs.some(b=>b.special)) return false;
-  const normals=S.bigs.filter(b=>!b.special);
-  if(normals.length!==1) return false;
-  const last=normals[0];
-  const p=S.mine.pos;
-  const chase=p && ((last.k==='good'&&p.dir>0)||(last.k==='bad'&&p.dir<0));
-  const ch=chase?0.22:0.05;
-  if(Math.random()>=ch) return false;
-  if(chase && p){
-    if(p.dir>0) startBankrupt();        // 追多 → 退市跌停
-    else fireLimitUp();                 // 追空 → 封死涨停
-  }else{
-    if(Math.random()<0.5) startBankrupt(); else fireLimitUp();
-  }
-  return true;
-}
-function fireLimitUp(){
-  const d=rndi(2,4);
-  S.bigs.push({t:'封死涨停',k:'good',m:'pin',v:1,left:d,days:d,special:true});
+  if(S.tick<25) return false;
+  if(Math.random()>=0.012) return false;
+  const list=SPECIAL[S.diff]||[];
+  if(!list.length) return false;
+  const e=list[rndi(0,list.length-1)];
+  if(S.bigs.some(b=>b.t===e.t)) return false;
+  const mul=D.daysMul||1;
+  const d=Math.max(2,Math.round(rndi(e.d[0],e.d[1])*mul));
+  S.bigs.push({t:e.t,k:e.k,m:'bias',v:e.k==='good'?0.78:e.k==='bad'?0.2:0.5,left:d,days:d,special:true});
+  toast('特殊事件：'+e.t);
   renderEvents();
+  return true;
 }
 function fireSmall(){
   const e=SMALL[rndi(0,SMALL.length-1)];
@@ -903,19 +1005,19 @@ function stChance(){
 /* ============ 退市风险 / 摘帽（地狱·真实） ============ */
 function triggerST(){
   S.minor=[];S.bigs=[];
-  S.spec={type:'st',phase:'smash',left:3,day:0};
-  S.bigs.push({t:'退市风险警示',k:'bad',m:'pin',v:-1,left:3,days:3,special:true});
+  S.spec={type:'st',phase:'smash',left:2,day:0};
+  S.bigs.push({t:'退市风险警示',k:'bad',left:2,days:2,special:true});
   document.querySelector('.eventbox').classList.add('bankrupt');
   renderEvents();renderProb();
-  toast('收到退市风险警示：先连续跌停，再在底下磨');
+  toast('收到退市风险警示：先砸两根跌停，再在底下磨');
 }
 function triggerHat(){
-  const left=rndi(4,7);
+  const left=rndi(2,4);
   S.spec={type:'hat',left};
-  S.bigs=[{t:'摘帽',k:'good',m:'pin',v:1,left,days:left,special:true}];
+  S.bigs=[{t:'摘帽',k:'good',left,days:left,special:true}];
   document.querySelector('.eventbox').classList.remove('bankrupt');
   renderEvents();renderProb();
-  toast('摘帽了：一路涨停');
+  toast('摘帽了：连拉几根');
 }
 function specTick(){
   if(!S.spec) return;
@@ -923,36 +1025,36 @@ function specTick(){
   if(S.spec.type==='hat'){
     S.spec.left--;
     if(S.spec.left<=0){
-      endSpec(); pushBar(st.limit);
+      endSpec(); pushBar(st.limit*rnd(0.85,1));
       checkLiquidation();paint();draw();renderEvents();renderProb();
       return;
     }
-    pushBar(st.limit);
+    pushBar(st.limit*rnd(0.7,1));
     if(S.bigs[0]) S.bigs[0].left=S.spec.left;
   }else if(S.spec.phase==='smash'){
-    // 砸盘：连续一字跌停
+    // 砸盘：两根跌停
     S.spec.left--;
     if(S.spec.left<=0){ S.spec.phase='bottom'; if(S.bigs[0]) S.bigs[0].grind=true; }
-    pushBar(-st.limit);
+    pushBar(-st.limit*rnd(0.85,1));
   }else{
     // 磨底：±2% 墨迹，摘帽概率逐日升高，偶尔冒个事件打破平静
     S.spec.day=(S.spec.day||0)+1;
-    const hc=clamp(0.09+S.spec.day*0.03,0.09,0.5);
+    const hc=clamp(0.10+S.spec.day*0.03,0.10,0.5);
     if(Math.random()<hc){
-      triggerHat(); pushBar(st.limit);
-    }else if(Math.random()<0.04){
+      triggerHat(); pushBar(st.limit*rnd(0.85,1));
+    }else if(Math.random()<0.05){
       const pool=bigPool();
       const e=pool[rndi(0,pool.length-1)];
-      if(e && !e.pin && !S.bigs.some(b=>b.t===e.t)){
+      if(e && !e.jx && !S.bigs.some(b=>b.t===e.t)){
         const d=Math.max(2,Math.round(rndi(e.d[0],e.d[1])*(DIFF().daysMul||1)));
         S.bigs.push({t:e.t,k:e.k,m:'bias',v:e.k==='good'?0.75:e.k==='bad'?0.25:0.5,left:d,days:d});
-        pushBar((e.k==='good'?1:-1)*rnd(4,8));
+        pushBar((e.k==='good'?1:-1)*rnd(2,5));
         toast('突发：'+e.t);
       }else{
-        pushBar(rnd(-2,2));
+        pushBar(gauss()*1.4);
       }
     }else{
-      pushBar(rnd(-2,2));
+      pushBar(gauss()*1.2);
     }
     if(S.bigs[0]) S.bigs[0].left=S.spec.day;
   }
@@ -1002,7 +1104,14 @@ function bankruptTick(){
   paint();draw();renderEvents();renderProb();
 }
 
-/* ============ 交易 ============ */
+/* ============ 交易 ============
+   全局放开：涨停能买、跌停能卖，多空随时开。
+   只有特殊事件（退市风险砸盘 / 破产退市流程）期间禁止开新仓。 */
+function lockReason(){
+  if(S.bankrupt) return '退市流程中，不能开新仓';
+  if(S.spec && S.spec.type==='st' && S.spec.phase==='smash') return '退市风险砸盘中，不能开新仓';
+  return null;
+}
 function maxHands(){
   const one=LOT*S.price;
   return Math.max(0, Math.floor(S.mine.cash*S.mine.lev/one));
@@ -1013,29 +1122,43 @@ function setHands(n){
   $('hNum').value=S.mine.wantHands;
 }
 function openPos(dir){
-  if(S.mine.pos) return;
-  const st=S.stock;
-  if(dir>0 && atLimitUp()){ toast('涨停封板，买不进 —— 只能做空'); return; }
-  if(dir<0 && atLimitDown()){ toast('跌停封板，卖不出 —— 只能做多'); return; }
-  if(S.bankrupt && dir<0){ return; }
+  const lock=lockReason();
+  if(lock){ toast(lock); return; }
+  const cur=S.mine.pos;
+  // 反方向：先把原来的平掉，再开新的（随时可以反手）
+  if(cur && cur.dir!==dir) closePos(true);
   const mx=maxHands();
-  if(mx<1) return;
-  const hands=Math.min(Math.max(1,S.mine.wantHands),mx);
-  let amount=hands*LOT*S.price/S.mine.lev;
+  if(mx<1){ toast('可用资金不够一手'); return; }
+  if(S.mine.wantHands<1){ toast('手数是 0，先点 ＋ 或「梭哈」'); return; }
+  const hands=Math.min(S.mine.wantHands,mx);
+  const amount=hands*LOT*S.price/S.mine.lev;
   const fee=amount*DIFF().fee;
-  if(S.mine.cash < amount+fee) return;
+  if(S.mine.cash < amount+fee){ toast('可用资金不够'); return; }
   S.mine.cash-=amount+fee;
-  S.mine.pos={hands,dir,lev:S.mine.lev,open:S.price,margin:amount,born:S.tick};
+
+  const p=S.mine.pos;
+  if(p && p.dir===dir){
+    // 同向加仓：按手数加权均价
+    const tot=p.hands+hands;
+    p.open=(p.open*p.hands+S.price*hands)/tot;
+    p.hands=tot;
+    p.margin+=amount;
+    p.lev=S.mine.lev;
+    toast('加仓 '+hands+' 手');
+  }else{
+    S.mine.pos={hands,dir,lev:S.mine.lev,open:S.price,margin:amount,born:S.tick};
+  }
   sfxOpen();
+  setHands(S.mine.wantHands);
   paint();draw();
 }
-function closePos(){
+function closePos(force){
   const p=S.mine.pos;
   if(!p) return;
-  if(DIFF().tPlus1 && S.tick<=p.born){ toast('T+1：当天买入不能当天平仓'); return; }
-  if(p.dir<0 && atLimitUp()){ toast('涨停封板，空单平不掉'); return; }
-  if(p.dir>0 && atLimitDown()){ toast('跌停封板，多单平不掉'); return; }
-  if(S.bankrupt && p.dir>0){ toast('退市封死，多单平不掉'); return; }
+  if(!force){
+    if(DIFF().tPlus1 && S.tick<=p.born){ toast('T+1：当天买入不能当天平仓'); return; }
+    if(S.bankrupt){ toast('退市流程中不能平仓'); return; }
+  }
   const pnl=(S.price-p.open)*p.dir*p.hands*LOT;
   const fee=p.hands*LOT*S.price*DIFF().fee;
   S.mine.cash+=p.margin+pnl-fee;
@@ -1060,8 +1183,6 @@ function checkLiquidation(){
     paint();
   }
 }
-function atLimitUp(){ return S.lastPct >= S.stock.limit-0.01; }
-function atLimitDown(){ return S.lastPct <= -(S.stock.limit-0.01); }
 function pnlPct(){
   const p=S.mine.pos;
   if(!p) return 0;
@@ -1131,9 +1252,8 @@ function renderEvents(){
       d.className='ev-item'+(b.special?' spec':'');
       let days=b.left;
       if(b.t==='破产退市'&&S.bankrupt) days=S.bankrupt.left;
-      const unit=b.special?' 根':' 天';
-      const tail = b.grind ? ('磨底第 '+days+' 天') : ('剩 '+days+unit);
-      d.innerHTML='<span class="n '+b.k+'">【'+b.t+'】</span><span class="d">'+tail+'</span>';
+      const tail = b.grind ? ('磨底第 '+days+' 天') : ('剩 '+days+' 天');
+      d.innerHTML='<span class="n '+b.k+'">【'+b.t+'】</span><span class="d">'+tail+'</span><span class="hint">点击查看</span>';
       d.onclick=()=>showEvent(b);
       box.appendChild(d);
     });
@@ -1145,7 +1265,7 @@ function renderEvents(){
     if(!m) break;
     const d=document.createElement('div');
     d.className='mb-slot';
-    d.innerHTML='<div class="nm '+m.k+'">'+m.t+'</div><div class="fx">剩 '+m.left+' 天</div>';
+    d.innerHTML='<span class="hint">点击查看</span><div class="nm '+m.k+'">'+m.t+'</div><div class="fx">剩 '+m.left+' 天</div>';
     d.onclick=()=>showEvent(m);
     mb.appendChild(d);
   }
@@ -1166,8 +1286,8 @@ function renderProb(){
   $('upVal').style.color=upC;
   $('downVal').style.color=dnC;
   let note='纯随机';
-  if(S.bigs.some(b=>b.m==='pin'&&b.v>0)) note='涨停封板中';
-  else if(S.bigs.some(b=>b.m==='pin'&&b.v<0)) note='跌停封板中';
+  if(S.bigs.some(b=>b.jx>0)) note='跳空高开中';
+  else if(S.bigs.some(b=>b.jx<0)) note='跳空低开中';
   else if(dev>0.03) note=(S.upP>0.5?'偏多':'偏空')+' · 偏离 '+((S.upP-0.5)*100).toFixed(1)+'%';
   $('probNote').textContent=note;
 }
@@ -1300,17 +1420,20 @@ $('m3x').onclick=()=>{ closeDlg(); resumeGame(); };
 function eventDetail(b){
   const days=b.days||b.left;
   const good=b.k==='good', bad=b.k==='bad';
+  const weight = b.jx ? '这是异动级别的消息' : (b.special ? '特殊事件' : good?'利好':bad?'利空':'中性');
   if(S.diff==='novice'){
     return '【'+b.t+'】<br><br>'+
       (good?'<b style="color:#ff6b63">利好</b>事件。':bad?'<b style="color:#4ce08a">利空</b>事件。':'中性事件。')+
-      '<br>影响：'+(good?'上涨概率 <b>+25%</b>':bad?'下跌概率 <b>+25%</b>':'不改变方向')+
-      '，持续 <b>'+days+'</b> 天左右。<br><br>同时在场的消息越多，波动越大。';
+      (b.jx?'<br>冲击很大：当天直接跳一根接近'+(b.jx>0?'涨停':'跌停')+'的K线。':'')+
+      '<br>影响：把每天涨跌的方向<b>往'+(good?'上':bad?'下':'两头')+'偏一点点</b>，不改变每天的波动幅度。'+
+      '持续 <b>'+days+'</b> 天左右。<br><br>同时在场的消息越多，方向会越一致（但不会因此天天涨停）。';
   }
   if(S.diff==='hard'){
-    return '【'+b.t+'】<br><br>市场对这条消息的看法还不统一，方向要自己判断。<br>大概会持续 <b>'+days+'</b> 天上下。';
+    return '【'+b.t+'】<br><br>'+weight+'。市场对这条消息的看法还不统一，方向要自己判断。'+
+      (b.jx?'<br>今天的盘口已经跳空了。':'')+'<br>大概会持续 <b>'+days+'</b> 天上下。';
   }
   if(S.diff==='hell'){
-    return '【'+b.t+'】<br><br>公告已披露。没有更多说明。';
+    return '【'+b.t+'】<br><br>公告已披露。没有更多说明。'+(b.jx?'<br>（已经跳空了，别追高。）':'');
   }
   const filler=[
     '该公司于近日收到相关方出具的《关于相关事项的告知函》，现将有关情况说明如下。',
@@ -1342,7 +1465,7 @@ function toast(msg){
   toastT=setTimeout(()=>el.classList.remove('show'),1600);
 }
 
-/* ============ 上交 ============ */
+/* ============ 游玩费（作者来收钱） ============ */
 function chargeAmount(n){
   const D=DIFF();
   return Math.round(D.chargeStart*Math.pow(D.chargeMul,n-1))+S.charge.owed;
@@ -1350,11 +1473,11 @@ function chargeAmount(n){
 function updateChargeBtn(){
   const D=DIFF();
   const el=$('btnChargeInfo');
-  if(!D.charge){ el.textContent='上交 —'; el.classList.add('dim'); return; }
-  if(S.charge.n>=D.chargeMax){ el.textContent='上交 · 已收满 '+D.chargeMax+' 次'; el.classList.add('dim'); return; }
+  if(!D.charge){ el.textContent='游玩费 —'; el.classList.add('dim'); return; }
+  if(S.charge.n>=D.chargeMax){ el.textContent='游玩费 · 已收满 '+D.chargeMax+' 次'; el.classList.add('dim'); return; }
   el.classList.remove('dim');
-  const next=DIFF().chargeEvery-(S.tick%DIFF().chargeEvery);
-  el.textContent='上交 '+S.charge.n+'/'+D.chargeMax+' · 还'+next+'根';
+  const next=D.chargeEvery-(S.tick%D.chargeEvery);
+  el.textContent='游玩费 '+S.charge.n+'/'+D.chargeMax+' · 还'+next+'根';
 }
 function maybeCharge(){
   const D=DIFF();
@@ -1369,12 +1492,12 @@ function maybeCharge(){
     settlePosition();
   }
   showDlg({
-    title:'第 '+S.charge.n+' 次上交',
-    body:'交易所要收 <b>¥'+fmt0(amt)+'</b>。<br>当前现金 <b>¥'+fmt0(S.mine.cash)+'</b>　剩余机会 <b>'+S.charge.chances+'</b><br>'+
-      (S.mine.cash<amt?'<span style="color:#ff8a5c">现金不足，选择上交会自动强平持仓。</span>':''),
+    title:'作者来收游玩费了',
+    body:'第 <b>'+S.charge.n+'</b> 次。作者要拿 <b>¥'+fmt0(amt)+'</b>。<br>当前现金 <b>¥'+fmt0(S.mine.cash)+'</b>　还能拒绝 <b>'+S.charge.chances+'</b> 次<br>'+
+      (S.mine.cash<amt?'<span style="color:#ff8a5c">现金不够，交钱会自动卖掉持仓。</span>':''),
     buttons:[
-      {text:'上交',cls:'ok',onClick:()=>doPayCharge(amt)},
-      {text:'拒绝',cls:'warn',onClick:()=>failCharge(amt)}
+      {text:'交钱',cls:'ok',onClick:()=>doPayCharge(amt)},
+      {text:'赖账',cls:'warn',onClick:()=>failCharge(amt)}
     ]
   });
 }
@@ -1392,13 +1515,13 @@ function doPayCharge(amt){
     failCharge(amt);
   }
 }
-/* 上交收满 */
+/* 游玩费收满 */
 function afterChargeFull(){
   pauseGame();
   if(S.diff==='real'){
     showDlg({
       title:'全部游戏内容已完成',
-      body:'33 次上交全部结清。<br>这个游戏能给你的东西，你已经走完了。<br><br>后面想怎么玩都行。',
+      body:'33 次游玩费全部结清，作者不再来了。<br>这个游戏能给你的东西，你已经走完了。<br><br>后面想怎么玩都行。',
       gold:true,
       buttons:[
         {text:'继续游玩',cls:'ok',onClick:()=>{closeDlg();resumeGame();}},
@@ -1409,7 +1532,7 @@ function afterChargeFull(){
   }
   showDlg({
     title:'你 已 获 胜',
-    body:'12 次上交全部结清，这个难度你通关了。<br><br>继续游玩当前难度，还是换个挑战？',
+    body:'12 次游玩费全部结清，作者收够了，这个难度你通关了。<br><br>继续游玩当前难度，还是换个挑战？',
     gold:true,
     buttons:[
       {text:'是 · 换个挑战',cls:'ok',onClick:()=>{ closeDlg(); setDiff(nextDiff(S.diff)); }},
@@ -1423,8 +1546,8 @@ function failCharge(amt){
   if(S.charge.chances<=0){ forfeit(); return; }
   closeDlg();
   showDlg({
-    title:'欠款挂账',
-    body:'这次没交成，<b>¥'+fmt0(amt)+'</b> 挂到下一次一起收。<br>剩余机会 <b>'+S.charge.chances+'</b> 次。',
+    title:'赖账挂上',
+    body:'这次没给钱，<b>¥'+fmt0(amt)+'</b> 挂到下一次一起收。<br>还能赖 <b>'+S.charge.chances+'</b> 次。',
     buttons:[{text:'继续',cls:'ok',onClick:()=>{closeDlg();paint();resumeGame();}}]
   });
 }
@@ -1433,8 +1556,8 @@ function forfeit(){
   S.mine.pos=null;
   closeDlg();
   showDlg({
-    title:'剩余资金已被收缴',
-    body:'三次机会用完了。<br>你的资金已经清零。<br><br><span style="color:#ffd75e">点「重启」重新开始。</span>',
+    title:'作者把你的钱全收了',
+    body:'三次赖账机会用完了，作者直接清场。<br>你的资金已经清零。<br><br><span style="color:#ffd75e">点「重启」重新开始。</span>',
     gold:true,
     buttons:[{text:'重 启',cls:'ok',onClick:()=>{closeDlg();resetGame(S.diff);}}]
   });
