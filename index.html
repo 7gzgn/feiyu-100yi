@@ -458,13 +458,13 @@ const DIFFS={
     showProb:true},
   hard:{label:'困难',bigMax:3,bigRate:0.14,smallRate:0.50,smallMax:6,
     levs:[1,2,5],special:true,charge:true,canMoney:false,canSwap:true,pool:'extra',fee:0.0005,
-    chargeStart:2000,chargeMul:1.75,chargeEvery:60,chances:3,chargeMax:12,daysMul:1.1},
+    chargeStart:2000,chargeMul:1.75,chargeEvery:25,chances:3,chargeMax:12,daysMul:1.1},
   hell:{label:'地狱',bigMax:4,bigRate:0.16,smallRate:0.60,smallMax:8,
     levs:[1,2],special:true,charge:true,canMoney:false,canSwap:false,pool:'hell',fee:0.0015,
-    chargeStart:2000,chargeMul:1.80,chargeEvery:55,chances:3,chargeMax:15,daysMul:1.25,stMode:true},
+    chargeStart:2000,chargeMul:1.80,chargeEvery:20,chances:3,chargeMax:15,daysMul:1.25,stMode:true},
   real:{label:'真实',bigMax:6,bigRate:0.18,smallRate:0.68,smallMax:11,
     levs:[1,2],special:true,charge:true,canMoney:false,canSwap:false,pool:'hell',fee:0.0025,
-    chargeStart:2000,chargeMul:1.85,chargeEvery:50,chances:3,chargeMax:33,daysMul:1.45,stMode:true,
+    chargeStart:2000,chargeMul:1.85,chargeEvery:15,chances:3,chargeMax:33,daysMul:1.45,stMode:true,
     tPlus1:true,interest:0.0006,noMiracle:true}
 };
 const CHAIN=['novice','hard','hell','real'];
@@ -844,14 +844,21 @@ function gauss(){
   return m*Math.cos(2*Math.PI*v);
 }
 function eventDrift(){
+  // 漂移必须和当日波动同量级，否则事件会被噪声淹没（原来写死 ±0.20，只占 vol 的 13%）
+  const vol=Math.max(0.5,S.volNow||(S.stock&&S.stock.vol)||1.5);
   let d=0;
   S.bigs.forEach(b=>{
-    if(b.jx) d+=b.jx*0.65;
-    else if(b.k==='good') d+=0.20;
-    else if(b.k==='bad') d-=0.20;
+    if(b.jx){ d+=b.jx*0.65; return; }
+    if(b.m==='range') return;      // range 型只放大波动，不指方向
+    const v=(b.v!=null?b.v:(b.k==='good'?0.75:b.k==='bad'?0.25:0.5));
+    d+=(v-0.5)*1.8*vol;            // 一个满强度大事件 ≈ 0.45 根同向波动
   });
-  S.minor.forEach(m=>{ d+=(m.v-0.5)*0.30; });
-  // 均值回归：价格离起点越远，拉回来的力越大（所以不会一路飞到天上或归零）
+  S.minor.forEach(m=>{
+    if(m.m==='range') return;
+    const v=(m.v!=null?m.v:0.5);
+    d+=(v-0.5)*0.55*vol;           // 小事件弱一档，但仍然看得见
+  });
+  // 均值回归：围绕缓慢移动的锚点
   d-=clamp((S.price/(S.anchor||S.price)-1)*1.8,-3.2,3.2);
   // 自己的仓位对盘口的冲击，很小
   const p=S.mine.pos;
@@ -859,19 +866,32 @@ function eventDrift(){
     const val=p.hands*LOT*S.price;
     d+=p.dir*clamp(val/25000000,0,0.012);
   }
-  return d;
+  return clamp(d,-4,4);
 }
 function nextPct(){
   const st=S.stock;
   const nEv=S.bigs.length+S.minor.length*0.5;
   let vol=S.volNow*(1+Math.min(0.40,nEv*0.03));
+  // range 型事件：本来就该放大波动区间（v 就是倍数），以前全是死字段
+  let rMul=1;
+  S.bigs.forEach(b=>{ if(b.m==='range'&&b.rv>1) rMul*=b.rv; });
+  S.minor.forEach(m=>{ if(m.m==='range'&&m.rv>1) rMul*=Math.sqrt(m.rv); });
+  vol*=clamp(rMul,1,2.6);
   // 肥尾：4% 的日子波动被放大 —— 真实盘口本来就有这种日子
   if(Math.random()<0.04) vol*=rnd(2,4.5);
   return clamp(gauss()*vol+eventDrift(),-st.limit,st.limit);
 }
 function upBias(){
-  const vol=Math.max(0.35,S.volNow||S.stock.vol);
-  return clamp(0.5+eventDrift()/(vol*2.8),0.06,0.94);
+  // 面板上的概率必须是「当日上涨的真实概率」，不是随便编的一个数：
+  // 价格 = gauss()*vol + drift，所以 P(涨) = Φ(drift/vol)，用 logistic 近似
+  // vol 要和 nextPct 用的一致：range 型事件会把波动放大，那时方向性会被稀释
+  let vol=Math.max(0.35,S.volNow||S.stock.vol);
+  let rMul=1;
+  S.bigs.forEach(b=>{ if(b.m==='range'&&b.rv>1) rMul*=b.rv; });
+  S.minor.forEach(m=>{ if(m.m==='range'&&m.rv>1) rMul*=Math.sqrt(m.rv); });
+  vol*=clamp(rMul,1,2.6);
+  const z=eventDrift()/vol;
+  return clamp(1/(1+Math.exp(-1.7*z)),0.02,0.98);
 }
 
 /* ============ 主循环 ============ */
@@ -889,7 +909,7 @@ function step(){
 
   if(D.stMode){
     if(Math.random()<stChance()){ startBankrupt(); return; }
-  }else if(Math.random()<0.0035){ startBankrupt(); return; }
+  }else if(S.diff!=='novice' && Math.random()<0.0035){ startBankrupt(); return; }
 
   // 波动聚集：安静一段、乱一段（真实盘口就是这样）
   S.regime=clamp(0.86*S.regime+0.14+gauss()*0.20,0.5,2.4);
@@ -901,9 +921,9 @@ function step(){
   else pct=nextPct();
   pushBar(pct);
 
-  // 真实档：持仓按天收利息
+  // 真实档：持仓按天收利息（现金不许被扣成负数）
   if(D.interest && S.mine.pos){
-    S.mine.cash-=S.mine.pos.hands*LOT*S.price*D.interest;
+    S.mine.cash=Math.max(0, S.mine.cash - S.mine.pos.hands*LOT*S.price*D.interest);
   }
   checkLiquidation();
   paint();draw();renderEvents();renderProb();
@@ -916,9 +936,15 @@ function pushBar(pct){
   S.bars.push({o,c,up:c>=o,pct});
   if(S.bars.length>500) S.bars.shift();
   S.price=c;S.lastPct=pct;
+  // 锚点缓慢跟随现价：否则均值回归会把价格永远钉在开局价，事件推不动
+  S.anchor=(S.anchor||c)*0.985+c*0.015;
 }
 
 /* ============ 大事件 ============ */
+/* 事件强度：库里给了 v 就用，没给按好坏给默认值 */
+function evV(e){ return e.v!=null?e.v:(e.k==='good'?0.75:e.k==='bad'?0.25:0.5); }
+function evM(e){ return e.m==='range'?'range':'bias'; }
+function evR(e){ return (e.m==='range'&&e.v!=null)?e.v:0; }
 function fireBig(){
   const D=DIFF();
   if(maybeSpecialBig()) return;
@@ -945,13 +971,13 @@ function fireBig(){
     return;
   }
 
-  S.bigs.push({t:e.t,k:e.k,m:'bias',v:e.k==='good'?0.75:e.k==='bad'?0.25:0.5,left:d,days:d});
+  S.bigs.push({t:e.t,k:e.k,m:evM(e),v:evV(e),rv:evR(e),left:d,days:d});
   // 联动：带出一条后续事件
   if(e.link && Math.random()<0.45){
     const l=pool.find(x=>x.t===e.link);
     if(l && !l.jx && !S.bigs.some(b=>b.t===l.t)){
       const dl=Math.max(2,Math.round(rndi(l.d[0],l.d[1])*mul));
-      S.bigs.push({t:l.t,k:l.k,m:'bias',v:l.k==='good'?0.75:l.k==='bad'?0.25:0.5,left:dl,days:dl,linked:true});
+      S.bigs.push({t:l.t,k:l.k,m:evM(l),v:evV(l),rv:evR(l),left:dl,days:dl,linked:true});
     }
   }
   renderEvents();
@@ -970,7 +996,7 @@ function maybeSpecialBig(){
   if(S.bigs.some(b=>b.t===e.t)) return false;
   const mul=D.daysMul||1;
   const d=Math.max(2,Math.round(rndi(e.d[0],e.d[1])*mul));
-  S.bigs.push({t:e.t,k:e.k,m:'bias',v:e.k==='good'?0.78:e.k==='bad'?0.2:0.5,left:d,days:d,special:true});
+  S.bigs.push({t:e.t,k:e.k,m:evM(e),v:evV(e),rv:evR(e),left:d,days:d,special:true});
   toast('特殊事件：'+e.t);
   renderEvents();
   return true;
@@ -979,7 +1005,7 @@ function fireSmall(){
   const e=SMALL[rndi(0,SMALL.length-1)];
   if(S.minor.some(m=>m.t===e.t)) return;
   const d=Math.max(2,Math.round(rndi(4,9)*(DIFF().daysMul||1)));
-  S.minor.push({t:e.t,k:e.k,m:'bias',v:e.v,left:d,days:d});
+  S.minor.push({t:e.t,k:e.k,m:evM(e),v:e.v,rv:evR(e),left:d,days:d});
   renderEvents();
 }
 function tickDown(){
@@ -1114,7 +1140,9 @@ function lockReason(){
 }
 function maxHands(){
   const one=LOT*S.price;
-  return Math.max(0, Math.floor(S.mine.cash*S.mine.lev/one));
+  const fee=DIFF().fee||0;
+  const unit=one*(1+fee)/S.mine.lev;   // 把手续费算进每手成本，否则「梭哈」会差几块钱开不出来
+  return Math.max(0, Math.floor(S.mine.cash/unit));
 }
 function setHands(n){
   const mx=maxHands();
@@ -1126,7 +1154,12 @@ function openPos(dir){
   if(lock){ toast(lock); return; }
   const cur=S.mine.pos;
   // 反方向：先把原来的平掉，再开新的（随时可以反手）
-  if(cur && cur.dir!==dir) closePos(true);
+  // 但反手不能绕过 T+1 —— 当天买的仓位，当天不许借"反手"平掉
+  if(cur && cur.dir!==dir){
+    if(DIFF().tPlus1 && S.tick<=cur.born){ toast('T+1：当天买入不能当天平仓'); return; }
+    if(S.bankrupt){ toast('退市流程中不能平仓'); return; }
+    closePos(true);
+  }
   const mx=maxHands();
   if(mx<1){ toast('可用资金不够一手'); return; }
   if(S.mine.wantHands<1){ toast('手数是 0，先点 ＋ 或「梭哈」'); return; }
@@ -1144,6 +1177,7 @@ function openPos(dir){
     p.hands=tot;
     p.margin+=amount;
     p.lev=S.mine.lev;
+    p.born=S.tick;              // 加的这一笔当天也不能平（T+1 跟着整仓顺延）
     toast('加仓 '+hands+' 手');
   }else{
     S.mine.pos={hands,dir,lev:S.mine.lev,open:S.price,margin:amount,born:S.tick};
@@ -1180,6 +1214,7 @@ function checkLiquidation(){
   if(p.margin+pnl<=0){
     S.mine.pos=null;
     sfxLose();
+    toast('爆仓：保证金全没了');
     paint();
   }
 }
@@ -1468,7 +1503,11 @@ function toast(msg){
 /* ============ 游玩费（作者来收钱） ============ */
 function chargeAmount(n){
   const D=DIFF();
-  return Math.round(D.chargeStart*Math.pow(D.chargeMul,n-1))+S.charge.owed;
+  const base=Math.round(D.chargeStart*Math.pow(D.chargeMul,n-1));
+  // 封顶在总资产的 8%：原来纯指数增长，第 8 次就要 18.6 万，1 万本金永远交不起，
+  // 33 次通关在数学上不可达，只能靠赖账三次被清场。
+  const cap=Math.round(totalMine()*0.08);
+  return Math.min(base,cap)+S.charge.owed;
 }
 function updateChargeBtn(){
   const D=DIFF();
@@ -1488,8 +1527,9 @@ function maybeCharge(){
   const amt=chargeAmount(S.charge.n);
   pauseGame();
   if(S.mine.cash<amt){
-    // 现金不足，自动强平
+    // 现金不足，自动强平（要给个提示，否则玩家只觉得持仓凭空消失）
     settlePosition();
+    toast('现金不够，先按现价卖掉了持仓');
   }
   showDlg({
     title:'作者来收游玩费了',
@@ -1532,7 +1572,7 @@ function afterChargeFull(){
   }
   showDlg({
     title:'你 已 获 胜',
-    body:'12 次游玩费全部结清，作者收够了，这个难度你通关了。<br><br>继续游玩当前难度，还是换个挑战？',
+    body:'<b>'+DIFF().chargeMax+'</b> 次游玩费全部结清，作者收够了，这个难度你通关了。<br><br>继续游玩当前难度，还是换个挑战？',
     gold:true,
     buttons:[
       {text:'是 · 换个挑战',cls:'ok',onClick:()=>{ closeDlg(); setDiff(nextDiff(S.diff)); }},
@@ -1650,7 +1690,7 @@ $('btnMoney').onclick=()=>{
   askNum('加多少万？（负数=扣）','10',v=>{
     const n=parseFloat(v);
     if(!isFinite(n)||n===0) return;
-    S.mine.cash+=n*10000;
+    S.mine.cash=Math.max(0,S.mine.cash+n*10000);
     paint();
   });
 };
